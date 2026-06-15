@@ -161,12 +161,42 @@ export default function SmartGuardLanding() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [showAllNews, setShowAllNews] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleChange = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (!form.name || !form.email) return;
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: "61656401-9d41-4670-a2af-5a18051a3d99",
+          subject: `【SmartGuard 官網諮詢】${form.type} - ${form.name}`,
+          from_name: "SmartGuard 官網表單",
+          姓名: form.name,
+          單位機構: form.org,
+          Email: form.email,
+          需求類別: form.type,
+          訊息內容: form.message,
+        }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        setSubmitted(true);
+      } else {
+        setSubmitError("送出失敗,請稍後再試,或直接寄信至 k3070447@gmail.com。");
+      }
+    } catch (err) {
+      setSubmitError("送出失敗,請確認網路連線後再試一次。");
+    } finally {
+      setSubmitting(false);
+    }
   };
   const closeMenu = () => setMenuOpen(false);
 
@@ -703,11 +733,17 @@ export default function SmartGuardLanding() {
                   </label>
                   <button
                     onClick={handleSubmit}
-                    className="flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-transform hover:scale-[1.02] sm:col-span-2"
+                    disabled={submitting}
+                    className="flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100 sm:col-span-2"
                     style={{ background: GRAD, boxShadow: "0 8px 26px rgba(71,194,226,0.35)" }}
                   >
-                    <Send size={18} /> 送出諮詢
+                    <Send size={18} /> {submitting ? "送出中…" : "送出諮詢"}
                   </button>
+                  {submitError && (
+                    <p className="sm:col-span-2 text-sm" style={{ color: "#D14343" }}>
+                      {submitError}
+                    </p>
+                  )}
                 </div>
               )}
             </GlassCard>
