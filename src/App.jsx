@@ -333,9 +333,9 @@ export default function SmartGuardLanding() {
               className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl"
               style={{ color: CI.ink, letterSpacing: "0.02em" }}
             >
-              智慧感測,主動守護。
+              <span className="sm:whitespace-nowrap">智慧感測,主動守護</span>
               <br />
-              <span className="sg-grad-text">重新定義銀髮安全新標準。</span>
+              <span className="sg-grad-text">重新定義銀髮安全新標準</span>
             </h1>
             <p className="sg-fade-up sg-d2 mt-7 max-w-xl text-base leading-relaxed sm:text-lg">
               專為長者設計的穿戴式跌倒預防設備,以獨家距離感測技術即時偵測環境風險,
