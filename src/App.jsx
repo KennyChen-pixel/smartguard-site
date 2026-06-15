@@ -332,7 +332,7 @@ export default function SmartGuardLanding() {
               SMARTGUARD・智慧銀髮跌倒防護系統
             </p>
             <h1
-              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl sm:leading-[1.3]"
+              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl sm:leading-[1.6]"
               style={{ color: CI.ink, letterSpacing: "0.02em" }}
             >
               <span className="sm:whitespace-nowrap">智慧感測 主動守護</span>
