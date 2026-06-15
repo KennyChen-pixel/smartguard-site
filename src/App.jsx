@@ -106,34 +106,13 @@ const iconMap = { Shield, Award, Cpu, Eye, Radio, HeartHandshake, Medal, FileBad
 /* ── 品牌 Logo(六角盾形 S 標誌)── */
 function LogoMark({ size = 36 }) {
   return (
-    <svg
+    <img
+      src="/logo.png"
+      alt="智感先鋒科技 SmartGuard 品牌標誌"
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      role="img"
-      aria-label="智感先鋒科技 SmartGuard 品牌標誌"
-    >
-      <defs>
-        <linearGradient id="sgGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={CI.mint} />
-          <stop offset="100%" stopColor={CI.cyan} />
-        </linearGradient>
-      </defs>
-      <path
-        d="M50 4 L91 27 V73 L50 96 L9 73 V27 Z"
-        stroke={CI.cyan}
-        strokeWidth="9"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M71 30 H42 a13 13 0 0 0 0 26 h16 a13 13 0 0 1 0 26 H29"
-        stroke="url(#sgGrad)"
-        strokeWidth="13"
-        strokeLinecap="square"
-        fill="none"
-      />
-    </svg>
+      style={{ width: size, height: size, objectFit: "contain" }}
+    />
   );
 }
 
