@@ -332,13 +332,17 @@ export default function SmartGuardLanding() {
               SMARTGUARD・智慧銀髮跌倒防護系統
             </p>
             <h1
-              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl sm:leading-[1.6]"
+              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl whitespace-nowrap"
               style={{ color: CI.ink, letterSpacing: "0.02em" }}
             >
-              <span className="sm:whitespace-nowrap">智慧感測 主動守護</span>
-              <br />
-              <span className="sg-grad-text">重新定義銀髮安全新標準</span>
+              智慧感測 主動守護
             </h1>
+            <p
+              className="sg-fade-up sg-d1 sg-grad-text mt-3 whitespace-nowrap text-lg font-bold sm:text-2xl lg:text-3xl"
+              style={{ letterSpacing: "0.02em" }}
+            >
+              重新定義銀髮安全新標準
+            </p>
             <p className="sg-fade-up sg-d2 mt-7 max-w-xl text-base leading-relaxed sm:text-lg">
               專為長者設計的跌倒預防設備，以獨家距離感測技術即時偵測環境風險，
               在跌倒發生「之前」就築起防線。
