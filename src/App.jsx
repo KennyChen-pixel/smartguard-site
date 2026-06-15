@@ -77,6 +77,12 @@ const newsData = [
     url: "https://www.medicaltaiwan.com.tw/zh-tw/news/80BFA2BD900FC425/info.html",
   },
   {
+    date: "2026",
+    title: "智感先鋒科技入選教育部 U-start 創業計畫，獲創業資源挹注",
+    icon: "Award",
+    url: "https://ustart.yda.gov.tw/p/16-1000-2210.php?Lang=zh-tw",
+  },
+  {
     date: "2025",
     title: "取得中華民國新型專利（專利公告號：M656911）",
     icon: "FileBadge",
@@ -619,18 +625,6 @@ export default function SmartGuardLanding() {
               打造最懂長者、也最讓照護者安心的 AgeTech 智慧照護系統，
               讓每位長輩都能在科技的守護下，享受尊嚴、安全且自信的銀髮生活。
             </p>
-          </div>
-
-          {/* 團隊照片預留位置 */}
-          <div className="mt-14">
-            <GlassCard innerClassName="flex aspect-[21/9] items-center justify-center">
-              <img
-                src=""
-                alt="智感先鋒科技團隊合照，來自工程與醫療科技領域的創新夥伴"
-                className="hidden"
-              />
-              <span className="px-6 text-xs sm:text-sm">團隊照片預留位置（建議使用真實團隊合照）</span>
-            </GlassCard>
           </div>
         </div>
       </section>
