@@ -44,41 +44,42 @@ const productsData = [
   {
     title: "獨家距離感測技術",
     description:
-      "精準偵測長者與周遭環境的空間距離,主動預警碰撞與跌倒風險。有別於傳統 IMU 步態分析,實現真正「事前預防」的主動防護。",
+      "精準偵測長者與周遭環境的空間距離，主動預警碰撞與跌倒風險。有別於傳統 IMU 步態分析，實現真正「事前預防」的主動防護。",
     icon: "Radio",
   },
   {
     title: "全天候主動防護",
     description:
-      "輕量化穿戴設計,全天候無感配戴,即時守護不中斷。讓防護融入日常,自在生活零負擔。",
+      "輕量化穿戴設計，全天候無感配戴，即時守護不中斷。讓防護融入日常，自在生活零負擔。",
     icon: "Shield",
   },
   {
     title: "科技銀髮照護",
     description:
-      "結合大數據與智慧演算,為長者及照護者提供最安心的防線,打造國際級 AgeTech 智慧照護體驗。",
+      "結合大數據與智慧演算，為長者及照護者提供最安心的防線，打造國際級 AgeTech 智慧照護體驗。",
     icon: "Cpu",
   },
 ];
 
-// 最新消息 / 榮譽獎項(url 預留:之後填入新聞稿或公告連結)
+// 最新消息 / 榮譽獎項（url 預留：之後填入新聞稿或公告連結）
+// 請將最新的消息放在陣列最上方（由新到舊排列）
 const newsData = [
   {
-    date: "2025",
-    title: "榮獲國際發明展銀牌獎,技術實力獲國際肯定",
-    icon: "Medal",
+    date: "2026",
+    title: "全新相關專利技術進入實質審查，持續強化技術壁壘",
+    icon: "Award",
     url: "#",
   },
   {
     date: "2025",
-    title: "取得中華民國新型專利(專利公告號:M656911)",
+    title: "取得中華民國新型專利（專利公告號：M656911）",
     icon: "FileBadge",
     url: "#",
   },
   {
-    date: "2026",
-    title: "全新相關專利技術進入實質審查,持續強化技術壁壘",
-    icon: "Award",
+    date: "2025",
+    title: "榮獲國際發明展銀牌獎，技術實力獲國際肯定",
+    icon: "Medal",
     url: "#",
   },
 ];
@@ -159,6 +160,7 @@ export default function SmartGuardLanding() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [showAllNews, setShowAllNews] = useState(false);
 
   const handleChange = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -330,15 +332,15 @@ export default function SmartGuardLanding() {
               SMARTGUARD・智慧銀髮跌倒防護系統
             </p>
             <h1
-              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl"
+              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl sm:leading-[1.3]"
               style={{ color: CI.ink, letterSpacing: "0.02em" }}
             >
-              <span className="sm:whitespace-nowrap">智慧感測,主動守護</span>
+              <span className="sm:whitespace-nowrap">智慧感測 主動守護</span>
               <br />
               <span className="sg-grad-text">重新定義銀髮安全新標準</span>
             </h1>
             <p className="sg-fade-up sg-d2 mt-7 max-w-xl text-base leading-relaxed sm:text-lg">
-              專為長者設計的穿戴式跌倒預防設備,以獨家距離感測技術即時偵測環境風險,
+              專為長者設計的跌倒預防設備，以獨家距離感測技術即時偵測環境風險，
               在跌倒發生「之前」就築起防線。
             </p>
             <div className="sg-fade-up sg-d3 mt-10 flex flex-wrap items-center gap-4">
@@ -413,8 +415,8 @@ export default function SmartGuardLanding() {
           <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
             核心技術與產品特點
           </h2>
-          <p className="mt-5 max-w-2xl leading-relaxed">
-            我們以「距離感測技術」取代傳統單純的 IMU 步態分析,從被動偵測跌倒,
+          <p className="mt-5 max-w-2xl leading-relaxed lg:max-w-none lg:whitespace-nowrap">
+            我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，
             進化為<strong style={{ color: CI.ink }}>主動預防跌倒</strong>。
           </p>
 
@@ -445,20 +447,20 @@ export default function SmartGuardLanding() {
                 <h3 className="text-xl font-black leading-snug sm:text-2xl" style={{ color: CI.ink }}>
                   距離感測 ≠ 傳統 IMU
                   <br />
-                  <span className="sg-grad-text">預防,發生在跌倒之前</span>
+                  <span className="sg-grad-text">預防，發生在跌倒之前</span>
                 </h3>
                 <ul className="mt-7 space-y-5 text-sm leading-relaxed">
                   <li className="flex gap-3">
                     <Eye size={18} color={CI.cyanDeep} className="mt-0.5 shrink-0" />
-                    即時掃描長者與環境間的空間距離,於碰撞風險形成前主動預警。
+                    即時掃描長者與環境間的空間距離，於碰撞風險形成前主動預警。
                   </li>
                   <li className="flex gap-3">
                     <Radio size={18} color={CI.mintDeep} className="mt-0.5 shrink-0" />
-                    不依賴跌倒後的姿態判讀,真正做到「事前防護」而非「事後通報」。
+                    不依賴跌倒後的姿態判讀，真正做到「事前防護」而非「事後通報」。
                   </li>
                   <li className="flex gap-3">
                     <HeartHandshake size={18} color={CI.cyanDeep} className="mt-0.5 shrink-0" />
-                    輕量無感配戴,讓守護自然融入長輩的每一步日常。
+                    輕量無感配戴，讓守護自然融入長輩的每一步日常。
                   </li>
                 </ul>
               </div>
@@ -468,7 +470,7 @@ export default function SmartGuardLanding() {
                 {/* 產品照片預留位置 */}
                 <img
                   src=""
-                  alt="SmartGuard 穿戴式跌倒預防裝置產品實照,展示輕量化距離感測模組"
+                  alt="SmartGuard 穿戴式跌倒預防裝置產品實照，展示輕量化距離感測模組"
                   className="hidden"
                 />
                 <div className="relative flex h-32 w-32 items-center justify-center">
@@ -494,14 +496,11 @@ export default function SmartGuardLanding() {
             NEWS & HONORS
           </p>
           <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-            最新消息與榮譽專利
+            最新消息與榮譽
           </h2>
-          <p className="mt-5 max-w-2xl leading-relaxed">
-            技術實力,經得起國際舞台與專利審查的雙重驗證。
-          </p>
 
           <div className="mt-16 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {newsData.map((n) => {
+            {(showAllNews ? newsData : newsData.slice(0, 3)).map((n) => {
               const Icon = iconMap[n.icon] || Award;
               return (
                 <GlassCard key={n.title} href={n.url} innerClassName="flex h-full flex-col p-8">
@@ -531,6 +530,19 @@ export default function SmartGuardLanding() {
               );
             })}
           </div>
+
+          {newsData.length > 3 && (
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAllNews((v) => !v)}
+                className="rounded-full px-6 py-2.5 text-sm font-bold transition-transform hover:scale-105"
+                style={{ color: CI.cyanDeep, border: `1.5px solid ${CI.cyan}`, backgroundColor: "rgba(71,194,226,0.06)" }}
+              >
+                {showAllNews ? "收合內容" : "查看更多"}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -546,25 +558,26 @@ export default function SmartGuardLanding() {
             ABOUT US
           </p>
           <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-            讓科技更有溫度,用智慧守護摯愛
+            科技更有溫度 用智慧守護摯愛
           </h2>
 
           <blockquote className="mx-auto mt-12 max-w-2xl text-base font-semibold leading-loose sm:text-lg" style={{ color: CI.ink }}>
-            「智感先鋒科技的誕生,源於一個簡單卻深刻的初心——
-            我們希望能用最頂尖的科技,為家中的長者築起一道安心的防線。」
+            「智感先鋒科技的誕生，源於一個簡單卻深刻的初心——
+            <br />
+            我們希望能用最頂尖的科技，為家中的長者築起一道安心的防線。」
           </blockquote>
 
           <div className="mx-auto mt-10 max-w-2xl space-y-6 text-left text-sm leading-loose sm:text-base">
             <p>
-              我們是一群來自材料工程與醫療科技領域的創新夥伴。我們深知,隨著高齡化社會到來,
-              跌倒往往是長者健康最大的隱形威脅。因此,我們走進照護現場,
+              我們是一群來自工程與醫療科技領域的創新夥伴。我們深知，隨著高齡化社會到來，
+              跌倒往往是長者健康最大的隱形威脅。因此，我們走進照護現場，
               將複雜的「距離感測技術」轉化為溫暖、輕量且無感的日常陪伴。
             </p>
             <p>
-              我們不追求冰冷的數據,而是專注於「主動防護」的每一個細節。
-              智感先鋒科技將持續秉持對生命的關懷,結合跨領域的研發實力,
-              打造最懂長者、也最讓照護者安心的 AgeTech 智慧照護系統,
-              讓每位長輩都能在科技的守護下,享受尊嚴、安全且自信的銀髮生活。
+              我們不追求冰冷的數據，而是專注於「主動防護」的每一個細節。
+              智感先鋒科技將持續秉持對生命的關懷，結合跨領域的研發實力，
+              打造最懂長者、也最讓照護者安心的 AgeTech 智慧照護系統，
+              讓每位長輩都能在科技的守護下，享受尊嚴、安全且自信的銀髮生活。
             </p>
           </div>
 
@@ -573,10 +586,10 @@ export default function SmartGuardLanding() {
             <GlassCard innerClassName="flex aspect-[21/9] items-center justify-center">
               <img
                 src=""
-                alt="智感先鋒科技團隊合照,來自材料工程與醫療科技領域的創新夥伴"
+                alt="智感先鋒科技團隊合照，來自工程與醫療科技領域的創新夥伴"
                 className="hidden"
               />
-              <span className="px-6 text-xs sm:text-sm">團隊照片預留位置(建議使用真實團隊合照)</span>
+              <span className="px-6 text-xs sm:text-sm">團隊照片預留位置（建議使用真實團隊合照）</span>
             </GlassCard>
           </div>
         </div>
@@ -598,15 +611,15 @@ export default function SmartGuardLanding() {
               商務合作與產品諮詢
             </h2>
             <p className="mt-5 leading-relaxed">
-              無論您是照護機構、通路夥伴或關心家中長輩的家屬,
-              歡迎與我們聯繫,我們將於三個工作天內回覆。
+              無論您是照護機構、通路夥伴或關心家中長輩的家屬，
+              歡迎與我們聯繫，我們將於三個工作天內回覆。
             </p>
             <ul className="mt-9 space-y-4 text-sm">
               <li className="flex items-center gap-3">
-                <Mail size={18} color={CI.cyanDeep} /> contact@smartguard-tech.tw
+                <Mail size={18} color={CI.cyanDeep} /> k3070447@gmail.com
               </li>
               <li className="flex items-center gap-3">
-                <Phone size={18} color={CI.mintDeep} /> (07) 000-0000
+                <Phone size={18} color={CI.mintDeep} /> 0966-312-546
               </li>
               <li className="flex items-center gap-3">
                 <MapPin size={18} color={CI.cyanDeep} /> 高雄市鼓山區蓮海路 70 號
@@ -622,7 +635,7 @@ export default function SmartGuardLanding() {
                   <h3 className="text-xl font-bold" style={{ color: CI.ink }}>
                     已收到您的訊息
                   </h3>
-                  <p className="text-sm">我們將於三個工作天內與您聯繫,感謝您的支持。</p>
+                  <p className="text-sm">我們將於三個工作天內與您聯繫，感謝您的支持。</p>
                 </div>
               ) : (
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -715,7 +728,7 @@ export default function SmartGuardLanding() {
                 <p className="text-sm font-bold" style={{ color: CI.ink }}>
                   智感先鋒科技 SmartGuard Technology
                 </p>
-                <p className="text-xs">智慧感測,主動守護。</p>
+                <p className="text-xs">智慧感測 主動守護</p>
               </div>
             </div>
             <nav aria-label="頁尾連結" className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
@@ -730,11 +743,10 @@ export default function SmartGuardLanding() {
             </nav>
           </div>
           <div
-            className="mt-10 flex flex-col gap-2 pt-6 text-xs sm:flex-row sm:justify-between"
+            className="mt-10 flex flex-col gap-2 pt-6 text-xs sm:flex-row sm:justify-center"
             style={{ borderTop: "1px solid rgba(71,194,226,0.18)" }}
           >
             <p>© {new Date().getFullYear()} 智感先鋒科技 SmartGuard Technology. All rights reserved.</p>
-            <p>專利公告號:M656911|國際發明展銀牌獎</p>
           </div>
         </div>
       </footer>
