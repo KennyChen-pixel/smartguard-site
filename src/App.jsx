@@ -66,6 +66,18 @@ const productsData = [
 const newsData = [
   {
     date: "2026",
+    title: "SmartGuard 將於 6/25-27 Medical Taiwan 2026 展出主動式防跌系統",
+    icon: "Radio",
+    url: "#",
+  },
+  {
+    date: "2026",
+    title: "中山大學攜 SmartGuard 亮相 Medical Taiwan 2026，智慧防跌系統獲實測肯定",
+    icon: "Award",
+    url: "https://www.medicaltaiwan.com.tw/zh-tw/news/80BFA2BD900FC425/info.html",
+  },
+  {
+    date: "2026",
     title: "全新相關專利技術進入實質審查，持續強化技術壁壘",
     icon: "Award",
     url: "#",
@@ -211,7 +223,7 @@ export default function SmartGuardLanding() {
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap');
 
         @keyframes sg-ripple {
           0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 0.5; }
@@ -267,7 +279,7 @@ export default function SmartGuardLanding() {
         <nav aria-label="主要導覽" className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4">
           <a href="#hero" className="flex items-center gap-2.5" onClick={closeMenu}>
             <LogoMark size={34} />
-            <span className="text-base font-bold tracking-wide" style={{ color: CI.ink, fontFamily: "'Zen Maru Gothic','Noto Sans TC',sans-serif" }}>
+            <span className="text-base font-bold tracking-wide" style={{ color: CI.ink, fontFamily: "'M PLUS Rounded 1c','Noto Sans TC',sans-serif" }}>
               智感先鋒科技
               <span className="ml-2 hidden text-xs font-semibold tracking-widest md:inline" style={{ color: CI.cyanDeep, fontFamily: "'Inter',sans-serif" }}>
                 SMARTGUARD TECH
@@ -765,7 +777,7 @@ export default function SmartGuardLanding() {
             <div className="flex items-center gap-3">
               <LogoMark size={32} />
               <div>
-                <p className="text-sm font-bold" style={{ color: CI.ink, fontFamily: "'Zen Maru Gothic','Noto Sans TC',sans-serif" }}>
+                <p className="text-sm font-bold" style={{ color: CI.ink, fontFamily: "'M PLUS Rounded 1c','Noto Sans TC',sans-serif" }}>
                   智感先鋒科技 SmartGuard Technology
                 </p>
                 <p className="text-xs">智慧感測 主動守護</p>
