@@ -66,21 +66,15 @@ const productsData = [
 const newsData = [
   {
     date: "2026",
-    title: "SmartGuard 將於 6/25-27 Medical Taiwan 2026 展出主動式防跌系統",
+    title: "智感先鋒科技將於 6/25-27 Medical Taiwan 2026 展出主動式防跌系統",
     icon: "Radio",
-    url: "#",
+    url: "https://www.medicaltaiwan.com.tw/zh-tw/menu/7EB43B97FCB8AED7D0636733C6861689/info.html",
   },
   {
     date: "2026",
-    title: "中山大學攜 SmartGuard 亮相 Medical Taiwan 2026，智慧防跌系統獲實測肯定",
+    title: "中山大學攜智感先鋒科技亮相 Medical Taiwan 2026，智慧防跌系統獲實測肯定",
     icon: "Award",
     url: "https://www.medicaltaiwan.com.tw/zh-tw/news/80BFA2BD900FC425/info.html",
-  },
-  {
-    date: "2026",
-    title: "全新相關專利技術進入實質審查，持續強化技術壁壘",
-    icon: "Award",
-    url: "#",
   },
   {
     date: "2025",
