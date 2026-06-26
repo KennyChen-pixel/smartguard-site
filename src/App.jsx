@@ -59,6 +59,12 @@ const productsData = [
       "結合大數據與智慧演算，為長者及照護者提供最安心的防線，打造國際級 AgeTech 智慧照護體驗。",
     icon: "Cpu",
   },
+  {
+    title: "AI 智慧分析",
+    description:
+      "即時分析步態數據，持續優化偵測準確率，讓防護系統越用越聰明。",
+    icon: "Cpu",
+  },
 ];
 
 // 最新消息 / 榮譽獎項（url 預留：之後填入新聞稿或公告連結）
@@ -89,7 +95,7 @@ const newsData = [
     url: "#",
   },
   {
-    date: "2025",
+    date: "2023",
     title: "榮獲國際發明展銀牌獎，技術實力獲國際肯定",
     icon: "Medal",
     url: "#",
@@ -384,6 +390,12 @@ export default function SmartGuardLanding() {
               style={{ letterSpacing: "0.02em" }}
             >
               重新定義銀髮安全新標準
+            </p>
+            <p
+              className="sg-fade-up sg-d1 mt-2 text-sm sm:text-base font-medium"
+              style={{ color: CI.inkSoft }}
+            >
+              AI 驅動的主動防跌技術
             </p>
             <p className="sg-fade-up sg-d2 mt-7 max-w-xl text-base leading-relaxed sm:text-lg">
               專為長者設計的跌倒預防設備，以獨家距離感測技術即時偵測環境風險，
