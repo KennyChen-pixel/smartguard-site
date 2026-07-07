@@ -1,0 +1,12 @@
+# 依賴套件（npm install 會自動產生，不需上傳）
+node_modules/
+
+# 建置輸出（部署平台會自己跑 build）
+dist/
+
+# 系統與編輯器暫存
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

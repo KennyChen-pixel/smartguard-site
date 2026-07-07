@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Shield,
+  AlertCircle,
+  RotateCcw,
   Award,
   Cpu,
   Eye,
@@ -109,6 +111,19 @@ const trustData = [
   { value: "92%", label: "受測長者行走安心感提升" },
 ];
 
+// 產品實照（拿到專業產品照後，將檔案放入 public 並填入路徑，例如 "/product.jpg"，
+// 核心技術區塊會自動以照片取代波紋動畫佔位）
+const productImage = "";
+
+// 團隊照片（關於我們區塊）
+const teamPhoto = {
+  src: "/team.jpg",
+  width: 1477,
+  height: 1108,
+  alt: "智感先鋒科技團隊於 Medical Taiwan 台灣國際醫療暨健康照護展攤位合影",
+  caption: "團隊於 Medical Taiwan 台灣國際醫療暨健康照護展，現場展出智慧主動式防跌偵測系統",
+};
+
 // 導覽連結
 const navLinks = [
   { label: "核心技術", href: "#tech" },
@@ -136,11 +151,12 @@ function LogoMark({ size = 36 }) {
 }
 
 /* ── 毛玻璃漸層邊框卡片(可選 href 變成連結)── */
-function GlassCard({ href, className = "", innerClassName = "", children }) {
+function GlassCard({ href, className = "", innerClassName = "", children, ...rest }) {
   const Tag = href ? "a" : "div";
   return (
     <Tag
       href={href}
+      {...rest}
       className={`group relative block rounded-3xl shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${
         href ? "cursor-pointer" : ""
       } ${className}`}
@@ -168,6 +184,42 @@ function GlassCard({ href, className = "", innerClassName = "", children }) {
   );
 }
 
+/* ── 滾動進場動畫:區塊進入視窗時淡入上移(原生 IntersectionObserver,無需套件)── */
+function Reveal({ className = "", delay = 0, children }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`sg-reveal ${visible ? "sg-reveal-in" : ""} ${className}`}
+      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function SmartGuardLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [form, setForm] = useState({
@@ -181,12 +233,47 @@ export default function SmartGuardLanding() {
   const [showAllNews, setShowAllNews] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const handleChange = (field) => (e) =>
+  // 按 Esc 關閉行動選單
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
+  const handleChange = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));
+    // 使用者開始修改時,即時清除該欄位的錯誤提示
+    setFieldErrors((errs) => {
+      if (!errs[field]) return errs;
+      const next = { ...errs };
+      delete next[field];
+      return next;
+    });
+  };
 
-  const handleSubmit = async () => {
-    if (!form.name || !form.email) return;
+  const validateForm = () => {
+    const errs = {};
+    if (!form.name.trim()) errs.name = "請填寫姓名";
+    if (!form.email.trim()) {
+      errs.email = "請填寫 Email";
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
+      errs.email = "Email 格式不正確，請確認後再送出";
+    }
+    return errs;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = validateForm();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      return;
+    }
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -208,14 +295,23 @@ export default function SmartGuardLanding() {
       if (result.success) {
         setSubmitted(true);
       } else {
-        setSubmitError("送出失敗,請稍後再試,或直接寄信至 k3070447@gmail.com。");
+        setSubmitError("送出失敗，請稍後再試，或直接寄信至 k3070447@gmail.com。");
       }
     } catch (err) {
-      setSubmitError("送出失敗,請確認網路連線後再試一次。");
+      setSubmitError("送出失敗，請確認網路連線後再試一次。");
     } finally {
       setSubmitting(false);
     }
   };
+
+  // 成功送出後返回表單,重新填寫
+  const resetForm = () => {
+    setForm({ name: "", org: "", email: "", type: "產品諮詢", message: "" });
+    setFieldErrors({});
+    setSubmitError("");
+    setSubmitted(false);
+  };
+
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -229,7 +325,9 @@ export default function SmartGuardLanding() {
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap');
+        /* 平滑捲動,並預留固定導覽列高度,避免錨點標題被遮住 */
+        html { scroll-behavior: smooth; }
+        section[id] { scroll-margin-top: 84px; }
 
         @keyframes sg-ripple {
           0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 0.5; }
@@ -256,13 +354,29 @@ export default function SmartGuardLanding() {
         }
         .sg-float { animation: sg-float 7s ease-in-out infinite; }
 
+        /* 滾動進場:初始隱藏,進入視窗後淡入上移 */
+        .sg-reveal {
+          opacity: 0;
+          transform: translateY(26px);
+          transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        }
+        .sg-reveal-in { opacity: 1; transform: translateY(0); }
+
         @media (prefers-reduced-motion: reduce) {
+          html { scroll-behavior: auto; }
           .sg-ripple, .sg-fade-up, .sg-float { animation: none !important; opacity: 1; }
+          .sg-reveal { opacity: 1; transform: none; transition: none; }
         }
         .sg-input:focus {
           outline: none;
           border-color: ${CI.cyan};
           box-shadow: 0 0 0 3px rgba(71,194,226,0.18);
+        }
+        .sg-input-error {
+          border-color: #D14343 !important;
+        }
+        .sg-input-error:focus {
+          box-shadow: 0 0 0 3px rgba(209,67,67,0.15);
         }
         .sg-grad-text {
           background: ${GRAD};
@@ -358,6 +472,15 @@ export default function SmartGuardLanding() {
         )}
       </header>
 
+      {/* 行動選單背景遮罩:點擊選單以外區域即關閉 */}
+      {menuOpen && (
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 z-40 md:hidden"
+          onClick={closeMenu}
+        />
+      )}
+
       {/* ───────────── Hero ───────────── */}
       <section id="hero" className="relative overflow-hidden">
         {/* 品牌色柔光暈 */}
@@ -380,13 +503,13 @@ export default function SmartGuardLanding() {
               SMARTGUARD・智慧銀髮跌倒防護系統
             </p>
             <h1
-              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl whitespace-nowrap"
+              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl sm:whitespace-nowrap"
               style={{ color: CI.ink, letterSpacing: "0.02em" }}
             >
               智慧感測 主動守護
             </h1>
             <p
-              className="sg-fade-up sg-d1 sg-grad-text mt-3 whitespace-nowrap text-lg font-bold sm:text-2xl lg:text-3xl"
+              className="sg-fade-up sg-d1 sg-grad-text mt-3 text-lg font-bold sm:whitespace-nowrap sm:text-2xl lg:text-3xl"
               style={{ letterSpacing: "0.02em" }}
             >
               重新定義銀髮安全新標準
@@ -467,39 +590,43 @@ export default function SmartGuardLanding() {
           style={{ background: "radial-gradient(circle, rgba(95,194,164,0.14) 0%, transparent 70%)", filter: "blur(60px)" }}
         />
         <div className="relative mx-auto max-w-6xl px-5 sm:px-6">
-          <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.mintDeep }}>
-            CORE TECHNOLOGY
-          </p>
-          <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-            核心技術與產品特點
-          </h2>
-          <p className="mt-5 max-w-2xl leading-relaxed lg:max-w-none lg:whitespace-nowrap">
-            我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，
-            進化為<strong style={{ color: CI.ink }}>主動預防跌倒</strong>。
-          </p>
+          <Reveal>
+            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.mintDeep }}>
+              CORE TECHNOLOGY
+            </p>
+            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
+              核心技術與產品特點
+            </h2>
+            <p className="mt-5 max-w-3xl leading-relaxed">
+              我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，
+              進化為<strong style={{ color: CI.ink }}>主動預防跌倒</strong>。
+            </p>
+          </Reveal>
 
-          <div className="mt-16 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {productsData.map((p) => {
+          <div className="mt-16 grid gap-7 sm:grid-cols-2">
+            {productsData.map((p, i) => {
               const Icon = iconMap[p.icon] || Shield;
               return (
-                <GlassCard key={p.title} innerClassName="p-8">
-                  <span
-                    className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl"
-                    style={{ background: GRAD_SOFT }}
-                  >
-                    <Icon size={27} color={CI.ink} strokeWidth={1.8} />
-                  </span>
-                  <h3 className="mb-3 text-lg font-bold sm:text-xl" style={{ color: CI.ink }}>
-                    {p.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed">{p.description}</p>
-                </GlassCard>
+                <Reveal key={p.title} delay={(i % 2) * 120} className="h-full">
+                  <GlassCard className="h-full" innerClassName="p-8">
+                    <span
+                      className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl"
+                      style={{ background: GRAD_SOFT }}
+                    >
+                      <Icon size={27} color={CI.ink} strokeWidth={1.8} />
+                    </span>
+                    <h3 className="mb-3 text-lg font-bold sm:text-xl" style={{ color: CI.ink }}>
+                      {p.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed sm:text-[15px]">{p.description}</p>
+                  </GlassCard>
+                </Reveal>
               );
             })}
           </div>
 
           {/* 差異化說明 */}
-          <div className="mt-20">
+          <Reveal className="mt-20">
             <GlassCard innerClassName="grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-2">
               <div>
                 <h3 className="text-xl font-black leading-snug sm:text-2xl" style={{ color: CI.ink }}>
@@ -525,20 +652,23 @@ export default function SmartGuardLanding() {
               <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl"
                 style={{ background: "linear-gradient(135deg, rgba(71,194,226,0.12), rgba(95,194,164,0.12))" }}
               >
-                {/* 產品照片預留位置 */}
-                <img
-                  src=""
-                  alt="SmartGuard 穿戴式跌倒預防裝置產品實照，展示輕量化距離感測模組"
-                  className="hidden"
-                />
-                <div className="relative flex h-32 w-32 items-center justify-center">
-                  <span className="sg-ripple h-full w-full" />
-                  <span className="sg-ripple h-full w-full" style={{ animationDelay: "2.7s" }} />
-                  <Shield size={52} color={CI.mintDeep} strokeWidth={1.5} />
-                </div>
+                {productImage ? (
+                  <img
+                    src={productImage}
+                    alt="SmartGuard 穿戴式跌倒預防裝置產品實照，展示輕量化距離感測模組"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="relative flex h-32 w-32 items-center justify-center">
+                    <span className="sg-ripple h-full w-full" />
+                    <span className="sg-ripple h-full w-full" style={{ animationDelay: "2.7s" }} />
+                    <Shield size={52} color={CI.mintDeep} strokeWidth={1.5} />
+                  </div>
+                )}
               </div>
             </GlassCard>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -550,54 +680,86 @@ export default function SmartGuardLanding() {
           style={{ background: "radial-gradient(circle, rgba(71,194,226,0.14) 0%, transparent 70%)", filter: "blur(70px)" }}
         />
         <div className="relative mx-auto max-w-6xl px-5 sm:px-6">
-          <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.cyanDeep }}>
-            NEWS & HONORS
-          </p>
-          <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-            最新消息與榮譽
-          </h2>
+          <Reveal>
+            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.cyanDeep }}>
+              NEWS & HONORS
+            </p>
+            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
+              最新消息與榮譽
+            </h2>
+          </Reveal>
 
-          <div className="mt-16 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {/* 垂直時間軸:左側漸層軸線 + 年份節點,由新到舊 */}
+          <div className="relative mx-auto mt-16 max-w-3xl">
+            <span
+              aria-hidden="true"
+              className="absolute bottom-6 left-[23px] top-6 w-px sm:left-6"
+              style={{ background: GRAD, opacity: 0.35 }}
+            />
             {(showAllNews ? newsData : newsData.slice(0, 3)).map((n) => {
               const Icon = iconMap[n.icon] || Award;
+              const hasLink = n.url && n.url !== "#";
               return (
-                <GlassCard key={n.title} href={n.url} innerClassName="flex h-full flex-col p-8">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span
-                      className="flex h-12 w-12 items-center justify-center rounded-full"
-                      style={{ background: GRAD_SOFT }}
-                    >
-                      <Icon size={23} color={CI.ink} strokeWidth={1.8} />
-                    </span>
-                    <ArrowUpRight
-                      size={20}
-                      className="transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      style={{ color: CI.cyanDeep }}
-                    />
-                  </div>
-                  <time
-                    className="text-xs font-bold tracking-widest"
-                    style={{ color: CI.mintDeep, fontFamily: "'Inter',sans-serif" }}
+                <Reveal key={n.title} className="relative flex gap-5 pb-8 last:pb-0 sm:gap-7">
+                  {/* 時間軸節點 */}
+                  <span
+                    className="relative z-10 mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: CI.white,
+                      backgroundImage: GRAD_SOFT,
+                      border: "1.5px solid rgba(71,194,226,0.35)",
+                      boxShadow: "0 4px 14px rgba(71,194,226,0.18)",
+                    }}
                   >
-                    {n.date}
-                  </time>
-                  <h3 className="mt-2 text-base font-bold leading-relaxed sm:text-lg" style={{ color: CI.ink }}>
-                    {n.title}
-                  </h3>
-                </GlassCard>
+                    <Icon size={22} color={CI.ink} strokeWidth={1.8} />
+                  </span>
+                  <GlassCard
+                    href={hasLink ? n.url : undefined}
+                    target={hasLink ? "_blank" : undefined}
+                    rel={hasLink ? "noopener noreferrer" : undefined}
+                    className="flex-1"
+                    innerClassName="p-6 sm:p-7"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <time
+                          className="text-xs font-bold tracking-widest"
+                          style={{ color: CI.mintDeep, fontFamily: "'Inter',sans-serif" }}
+                        >
+                          {n.date}
+                        </time>
+                        <h3 className="mt-1.5 text-base font-bold leading-relaxed sm:text-lg" style={{ color: CI.ink }}>
+                          {n.title}
+                        </h3>
+                      </div>
+                      {hasLink && (
+                        <ArrowUpRight
+                          size={20}
+                          className="mt-1 shrink-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                          style={{ color: CI.cyanDeep }}
+                        />
+                      )}
+                    </div>
+                  </GlassCard>
+                </Reveal>
               );
             })}
           </div>
 
           {newsData.length > 3 && (
-            <div className="mt-10 flex justify-center">
+            <div className="mt-12 flex justify-center">
               <button
                 type="button"
                 onClick={() => setShowAllNews((v) => !v)}
-                className="rounded-full px-6 py-2.5 text-sm font-bold transition-transform hover:scale-105"
+                className="flex items-center gap-1.5 rounded-full px-6 py-2.5 text-sm font-bold transition-transform hover:scale-105"
                 style={{ color: CI.cyanDeep, border: `1.5px solid ${CI.cyan}`, backgroundColor: "rgba(71,194,226,0.06)" }}
               >
-                {showAllNews ? "收合內容" : "查看更多"}
+                {showAllNews ? "收合內容" : `查看更多（共 ${newsData.length} 則）`}
+                <ChevronDown
+                  size={16}
+                  className="transition-transform duration-300"
+                  style={{ transform: showAllNews ? "rotate(180deg)" : "none" }}
+                />
               </button>
             </div>
           )}
@@ -612,32 +774,52 @@ export default function SmartGuardLanding() {
           style={{ background: "radial-gradient(circle, rgba(95,194,164,0.16) 0%, transparent 70%)", filter: "blur(70px)" }}
         />
         <div className="relative mx-auto max-w-4xl px-5 text-center sm:px-6">
-          <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.mintDeep }}>
-            ABOUT US
-          </p>
-          <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-            科技更有溫度 用智慧守護摯愛
-          </h2>
-
-          <blockquote className="mx-auto mt-12 max-w-2xl text-base font-semibold leading-loose sm:text-lg" style={{ color: CI.ink }}>
-            「智感先鋒科技的誕生，源於一個簡單卻深刻的初心——
-            <br />
-            我們希望能用最頂尖的科技，為家中的長者築起一道安心的防線。」
-          </blockquote>
-
-          <div className="mx-auto mt-10 max-w-2xl space-y-6 text-left text-sm leading-loose sm:text-base">
-            <p>
-              我們是一群來自工程與醫療科技領域的創新夥伴。我們深知，隨著高齡化社會到來，
-              跌倒往往是長者健康最大的隱形威脅。因此，我們走進照護現場，
-              將複雜的「距離感測技術」轉化為溫暖、輕量且無感的日常陪伴。
+          <Reveal>
+            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.mintDeep }}>
+              ABOUT US
             </p>
-            <p>
-              我們不追求冰冷的數據，而是專注於「主動防護」的每一個細節。
-              智感先鋒科技將持續秉持對生命的關懷，結合跨領域的研發實力，
-              打造最懂長者、也最讓照護者安心的 AgeTech 智慧照護系統，
-              讓每位長輩都能在科技的守護下，享受尊嚴、安全且自信的銀髮生活。
-            </p>
-          </div>
+            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
+              科技更有溫度 用智慧守護摯愛
+            </h2>
+
+            <blockquote className="mx-auto mt-12 max-w-2xl text-base font-semibold leading-loose sm:text-lg" style={{ color: CI.ink }}>
+              「智感先鋒科技的誕生，源於一個簡單卻深刻的初心——
+              <br />
+              我們希望能用最頂尖的科技，為家中的長者築起一道安心的防線。」
+            </blockquote>
+
+            <div className="mx-auto mt-10 max-w-2xl space-y-6 text-left text-sm leading-loose sm:text-base">
+              <p>
+                我們是一群來自工程與醫療科技領域的創新夥伴。我們深知，隨著高齡化社會到來，
+                跌倒往往是長者健康最大的隱形威脅。因此，我們走進照護現場，
+                將複雜的「距離感測技術」轉化為溫暖、輕量且無感的日常陪伴。
+              </p>
+              <p>
+                我們不追求冰冷的數據，而是專注於「主動防護」的每一個細節。
+                智感先鋒科技將持續秉持對生命的關懷，結合跨領域的研發實力，
+                打造最懂長者、也最讓照護者安心的 AgeTech 智慧照護系統，
+                讓每位長輩都能在科技的守護下，享受尊嚴、安全且自信的銀髮生活。
+              </p>
+            </div>
+          </Reveal>
+
+          {/* 團隊照片 */}
+          <Reveal className="mt-14">
+            <GlassCard innerClassName="p-3 sm:p-4">
+              <img
+                src={teamPhoto.src}
+                alt={teamPhoto.alt}
+                width={teamPhoto.width}
+                height={teamPhoto.height}
+                loading="lazy"
+                className="w-full object-cover"
+                style={{ borderRadius: "16px" }}
+              />
+              <p className="px-2 pb-1.5 pt-4 text-center text-xs leading-relaxed sm:text-sm" style={{ color: CI.inkSoft }}>
+                {teamPhoto.caption}
+              </p>
+            </GlassCard>
+          </Reveal>
         </div>
       </section>
 
@@ -649,7 +831,7 @@ export default function SmartGuardLanding() {
           style={{ background: "radial-gradient(circle, rgba(71,194,226,0.16) 0%, transparent 70%)", filter: "blur(70px)" }}
         />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-5 sm:px-6 lg:grid-cols-5">
-          <div className="lg:col-span-2">
+          <Reveal className="lg:col-span-2">
             <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.cyanDeep }}>
               CONTACT
             </p>
@@ -671,9 +853,9 @@ export default function SmartGuardLanding() {
                 <MapPin size={18} color={CI.cyanDeep} /> 高雄市鼓山區蓮海路 70 號
               </li>
             </ul>
-          </div>
+          </Reveal>
 
-          <div className="lg:col-span-3">
+          <Reveal className="lg:col-span-3">
             <GlassCard innerClassName="p-7 sm:p-10">
               {submitted ? (
                 <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
@@ -682,9 +864,17 @@ export default function SmartGuardLanding() {
                     已收到您的訊息
                   </h3>
                   <p className="text-sm">我們將於三個工作天內與您聯繫，感謝您的支持。</p>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="mt-2 flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-bold transition-transform hover:scale-105"
+                    style={{ color: CI.cyanDeep, border: `1.5px solid ${CI.cyan}`, backgroundColor: "rgba(71,194,226,0.06)" }}
+                  >
+                    <RotateCcw size={15} /> 填寫新的訊息
+                  </button>
                 </div>
               ) : (
-                <div className="grid gap-5 sm:grid-cols-2">
+                <form onSubmit={handleSubmit} noValidate className="grid gap-5 sm:grid-cols-2">
                   <label className="flex flex-col gap-1.5 text-sm font-semibold" style={{ color: CI.ink }}>
                     姓名 *
                     <input
@@ -692,9 +882,16 @@ export default function SmartGuardLanding() {
                       value={form.name}
                       onChange={handleChange("name")}
                       placeholder="王小明"
-                      className="sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all"
+                      autoComplete="name"
+                      aria-invalid={!!fieldErrors.name}
+                      className={`sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all ${fieldErrors.name ? "sg-input-error" : ""}`}
                       style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
                     />
+                    {fieldErrors.name && (
+                      <span role="alert" className="flex items-center gap-1 text-xs font-medium" style={{ color: "#D14343" }}>
+                        <AlertCircle size={13} /> {fieldErrors.name}
+                      </span>
+                    )}
                   </label>
                   <label className="flex flex-col gap-1.5 text-sm font-semibold" style={{ color: CI.ink }}>
                     單位 / 機構
@@ -703,6 +900,7 @@ export default function SmartGuardLanding() {
                       value={form.org}
                       onChange={handleChange("org")}
                       placeholder="○○長照機構"
+                      autoComplete="organization"
                       className="sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all"
                       style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
                     />
@@ -714,9 +912,16 @@ export default function SmartGuardLanding() {
                       value={form.email}
                       onChange={handleChange("email")}
                       placeholder="you@example.com"
-                      className="sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all"
+                      autoComplete="email"
+                      aria-invalid={!!fieldErrors.email}
+                      className={`sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all ${fieldErrors.email ? "sg-input-error" : ""}`}
                       style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
                     />
+                    {fieldErrors.email && (
+                      <span role="alert" className="flex items-center gap-1 text-xs font-medium" style={{ color: "#D14343" }}>
+                        <AlertCircle size={13} /> {fieldErrors.email}
+                      </span>
+                    )}
                   </label>
                   <label className="flex flex-col gap-1.5 text-sm font-semibold" style={{ color: CI.ink }}>
                     需求類別
@@ -744,7 +949,7 @@ export default function SmartGuardLanding() {
                     />
                   </label>
                   <button
-                    onClick={handleSubmit}
+                    type="submit"
                     disabled={submitting}
                     className="flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100 sm:col-span-2"
                     style={{ background: GRAD, boxShadow: "0 8px 26px rgba(71,194,226,0.35)" }}
@@ -752,14 +957,14 @@ export default function SmartGuardLanding() {
                     <Send size={18} /> {submitting ? "送出中…" : "送出諮詢"}
                   </button>
                   {submitError && (
-                    <p className="sm:col-span-2 text-sm" style={{ color: "#D14343" }}>
-                      {submitError}
+                    <p role="alert" className="flex items-center gap-1.5 text-sm sm:col-span-2" style={{ color: "#D14343" }}>
+                      <AlertCircle size={15} className="shrink-0" /> {submitError}
                     </p>
                   )}
-                </div>
+                </form>
               )}
             </GlassCard>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -789,9 +994,6 @@ export default function SmartGuardLanding() {
                   {l.label}
                 </a>
               ))}
-              <a href="#" className="transition-opacity hover:opacity-60" style={{ color: CI.inkSoft }}>
-                隱私權政策
-              </a>
             </nav>
           </div>
           <div
