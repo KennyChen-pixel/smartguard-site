@@ -7,14 +7,52 @@
     <meta name="theme-color" content="#47C2E2" />
     <title>智感先鋒科技 SmartGuard Tech｜智慧銀髮跌倒防護系統</title>
     <meta name="description" content="智慧感測，主動守護。智感先鋒科技以獨家距離感測技術，打造專為長者設計的穿戴式主動防跌系統，在跌倒發生之前築起防線。" />
+    <link rel="canonical" href="https://smartguard-tech.vercel.app/" />
 
     <!-- Open Graph / 社群分享預覽 -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://smartguard-tech.vercel.app/" />
     <meta property="og:title" content="智感先鋒科技 SmartGuard Tech｜智慧銀髮跌倒防護系統" />
     <meta property="og:description" content="智慧感測，主動守護。以獨家距離感測技術，在跌倒發生之前築起防線。" />
-    <meta property="og:image" content="/logo.png" />
+    <meta property="og:image" content="https://smartguard-tech.vercel.app/logo.png" />
     <meta property="og:locale" content="zh_TW" />
     <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="智感先鋒科技 SmartGuard Tech｜智慧銀髮跌倒防護系統" />
+    <meta name="twitter:description" content="智慧感測，主動守護。以獨家距離感測技術，在跌倒發生之前築起防線。" />
+
+    <!-- 結構化資料:公司與產品(靜態輸出,不依賴 JS 執行即可被搜尋引擎讀取) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "智感先鋒科技",
+      "alternateName": "SmartGuard Technology",
+      "url": "https://smartguard-tech.vercel.app/",
+      "logo": "https://smartguard-tech.vercel.app/logo.png",
+      "email": "k3070447@gmail.com",
+      "telephone": "+886-966-312-546",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "鼓山區蓮海路 70 號",
+        "addressLocality": "高雄市",
+        "addressCountry": "TW"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "SmartGuard 智慧主動式防跌偵測系統",
+      "description": "專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險，在跌倒發生之前主動預警。榮獲國際發明展銀牌獎，取得中華民國新型專利（M656911）。",
+      "image": "https://smartguard-tech.vercel.app/product-render-2.png",
+      "url": "https://smartguard-tech.vercel.app/",
+      "brand": {
+        "@type": "Brand",
+        "name": "SmartGuard 智感先鋒科技"
+      }
+    }
+    </script>
 
     <!-- 字體預先連線與載入（取代 CSS @import，加快首屏渲染） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,6 +61,9 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+TC:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- 首屏產品主圖預先載入 -->
+    <link rel="preload" as="image" href="/product-render-2.png" />
   </head>
   <body>
     <div id="root"></div>

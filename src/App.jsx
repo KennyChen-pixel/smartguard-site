@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Shield,
   AlertCircle,
+  AlertTriangle,
   RotateCcw,
   Award,
   Cpu,
@@ -35,6 +36,7 @@ const CI = {
   mintInk: "#217A5F",     // 薄荷綠・文字階(安全/驗證語意)
   ink: "#13242E",         // 主文字・墨青
   inkSoft: "#46606E",     // 內文・霧灰青
+  warn: "#D97706",        // 琥珀警示・僅用於障礙物偵測標記(儀器警示燈慣用色)
   line: "rgba(19,36,46,0.10)", // 面板細邊框
   mist: "#F7FAFB",        // 主背景・晨霧白
   white: "#FFFFFF",
@@ -126,18 +128,22 @@ const productMedia = {
   hero: {
     src: "/product-render-2.png",
     width: 554,
-    height: 250,
+    height: 248,
     alt: "SmartGuard 穿戴式防跌裝置產品示意圖：拖鞋鞋面搭載距離感測模組",
   },
-  // 展場實測原型(核心技術區,「真實原型」證據)
+  // 產品實測原型(核心技術區,「真實原型」證據)
   prototype: {
     src: "/prototype.jpg",
+    width: 1125,
+    height: 1032,
     alt: "SmartGuard 防跌裝置實測原型：距離感測模組安裝於拖鞋鞋面，模組螢幕顯示即時偵測數據",
-    caption: "Medical Taiwan 展場實測原型",
+    caption: "產品實測原型",
   },
   // 量產外觀設計方向(核心技術區,與原型並列形成「原型→量產」敘事)
   design: {
     src: "/product-render-1.png",
+    width: 554,
+    height: 278,
     alt: "SmartGuard 量產外觀設計示意圖：感測器內嵌於鞋面的一體化設計",
     caption: "量產外觀設計方向",
   },
@@ -226,32 +232,9 @@ function SectionHead({ eyebrow, title, children }) {
   );
 }
 
-/* ── 首屏讀數:載入後一次性從 0 跳動至目標值(尊重減少動態偏好)── */
-function useCountUp(target, { duration = 800, delay = 1100 } = {}) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setValue(target);
-      return;
-    }
-    let raf;
-    const start = performance.now() + delay;
-    const tick = (now) => {
-      const p = Math.min(1, Math.max(0, (now - start) / duration));
-      setValue(Math.round(target * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration, delay]);
-  return value;
-}
-
-/* ── 量測線刻度位置(沿感測線等距分佈,角度與線垂直)── */
-const BEAM = { x1: 310, y1: 86, x2: 48, y2: 205 };
+/* ── 量測線幾何(對位 product-render-2.png 554×248):
+      感測模組右前緣 → 鞋尖前方地面;刻度沿線等距、角度與線垂直 ── */
+const BEAM = { x1: 372, y1: 92, x2: 524, y2: 208 };
 const BEAM_ANGLE =
   (Math.atan2(BEAM.y2 - BEAM.y1, BEAM.x2 - BEAM.x1) * 180) / Math.PI;
 const beamPoint = (t) => ({
@@ -273,9 +256,6 @@ export default function SmartGuardLanding() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
-
-  // 首屏儀器面板讀數:量測線掃出後,距離值一次性跳動定格
-  const distance = useCountUp(42);
 
   // 按 Esc 關閉行動選單
   useEffect(() => {
@@ -371,8 +351,8 @@ export default function SmartGuardLanding() {
         section[id] { scroll-margin-top: 84px; }
 
         /* ── 首屏唯一動畫橋段 ──
-           文字浮現 → 量測線自感測模組掃出 → 距離讀數跳動 → 預警標記亮起,
-           之後全頁靜止。 */
+           文字浮現 → 量測線自感測模組向前掃出 → 終點障礙物標記浮現
+           → 偵測文字 → 預警標記亮起,之後全頁靜止。 */
         @keyframes sg-fade-up {
           from { opacity: 0; transform: translateY(18px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -380,8 +360,9 @@ export default function SmartGuardLanding() {
         .sg-fade-up { animation: sg-fade-up 0.7s ease-out both; }
         .sg-d1 { animation-delay: .12s; } .sg-d2 { animation-delay: .3s; }
 
+        /* 量測線由左(模組)向右(地面)掃出 */
         @keyframes sg-sweep {
-          from { clip-path: inset(0 0 0 100%); }
+          from { clip-path: inset(0 100% 0 0); }
           to   { clip-path: inset(0 0 0 0); }
         }
         .sg-beam { animation: sg-sweep 0.9s ease-out 0.8s both; }
@@ -390,7 +371,10 @@ export default function SmartGuardLanding() {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
-        .sg-alert { animation: sg-appear 0.5s ease-out 2s both; }
+        .sg-alert { animation: sg-appear 0.5s ease-out both; }
+        .sg-alert-1 { animation-delay: 1.6s; } /* 障礙物標記 */
+        .sg-alert-2 { animation-delay: 1.9s; } /* 偵測文字 */
+        .sg-alert-3 { animation-delay: 2.2s; } /* 預警膠囊 */
 
         @media (prefers-reduced-motion: reduce) {
           html { scroll-behavior: auto; }
@@ -418,6 +402,13 @@ export default function SmartGuardLanding() {
         }
         .sg-input-error:focus {
           box-shadow: 0 0 0 3px rgba(209,67,67,0.15);
+        }
+
+        /* 鍵盤焦點:比瀏覽器預設更明顯的品牌色外框 */
+        :where(a, button):focus-visible {
+          outline: 2px solid ${CI.cyanDeep};
+          outline-offset: 2px;
+          border-radius: 4px;
         }
       `}</style>
 
@@ -528,13 +519,13 @@ export default function SmartGuardLanding() {
               <span aria-hidden="true" className="inline-block h-2 w-2" style={{ backgroundColor: CI.cyan }} />
               SMARTGUARD · AI 驅動主動防跌技術
             </p>
+            {/* 兩個詞組各自不可內部斷行:任何寬度下換行點只會落在逗號後 */}
             <h1
               className="text-4xl font-bold leading-tight sm:text-5xl lg:text-[3.4rem]"
               style={{ color: CI.ink, letterSpacing: "0.01em" }}
             >
-              智慧感測，
-              <br className="sm:hidden" />
-              主動守護
+              <span className="inline-block">智慧感測，</span>
+              <span className="inline-block">主動守護</span>
             </h1>
             <p className="mt-4 text-lg font-semibold sm:text-xl" style={{ color: CI.cyanInk }}>
               重新定義銀髮安全新標準
@@ -588,49 +579,62 @@ export default function SmartGuardLanding() {
                   alt={productMedia.hero.alt}
                   width={productMedia.hero.width}
                   height={productMedia.hero.height}
+                  fetchpriority="high"
                   className="w-full"
                 />
                 <svg
                   aria-hidden="true"
-                  className="sg-beam pointer-events-none absolute inset-0 h-full w-full"
-                  viewBox="0 0 554 250"
+                  className="pointer-events-none absolute inset-0 h-full w-full"
+                  viewBox="0 0 554 248"
                   fill="none"
                 >
-                  {/* 感測起點:模組位置 */}
-                  <circle cx={BEAM.x1} cy={BEAM.y1} r="4" fill={CI.cyanDeep} />
-                  <circle cx={BEAM.x1} cy={BEAM.y1} r="9" stroke={CI.cyanDeep} strokeWidth="1.2" opacity="0.5" />
-                  {/* 量測虛線:模組 → 前方地面 */}
-                  <line
-                    x1={BEAM.x1} y1={BEAM.y1} x2={BEAM.x2} y2={BEAM.y2}
-                    stroke={CI.cyanDeep} strokeWidth="1.4" strokeDasharray="7 5"
-                  />
-                  {/* 尺規刻度 */}
-                  {[0.25, 0.5, 0.75].map((t) => {
-                    const p = beamPoint(t);
-                    return (
-                      <line
-                        key={t}
-                        x1="0" y1="-6" x2="0" y2="6"
-                        stroke={CI.cyanDeep} strokeWidth="1.2"
-                        transform={`translate(${p.x} ${p.y}) rotate(${BEAM_ANGLE})`}
-                      />
-                    );
-                  })}
-                  {/* 量測終點:前方障礙物 */}
-                  <circle cx={BEAM.x2} cy={BEAM.y2} r="7" stroke={CI.cyanDeep} strokeWidth="1.4" />
-                  <circle cx={BEAM.x2} cy={BEAM.y2} r="2.5" fill={CI.cyanDeep} />
+                  {/* 量測線:由模組向前掃出 */}
+                  <g className="sg-beam">
+                    {/* 感測起點:模組位置 */}
+                    <circle cx={BEAM.x1} cy={BEAM.y1} r="4" fill={CI.cyanDeep} />
+                    <circle cx={BEAM.x1} cy={BEAM.y1} r="9" stroke={CI.cyanDeep} strokeWidth="1.2" opacity="0.5" />
+                    {/* 量測虛線:模組 → 鞋尖前方地面 */}
+                    <line
+                      x1={BEAM.x1} y1={BEAM.y1} x2={BEAM.x2} y2={BEAM.y2}
+                      stroke={CI.cyanDeep} strokeWidth="1.4" strokeDasharray="7 5"
+                    />
+                    {/* 尺規刻度 */}
+                    {[0.25, 0.5, 0.75].map((t) => {
+                      const p = beamPoint(t);
+                      return (
+                        <line
+                          key={t}
+                          x1="0" y1="-6" x2="0" y2="6"
+                          stroke={CI.cyanDeep} strokeWidth="1.2"
+                          transform={`translate(${p.x} ${p.y}) rotate(${BEAM_ANGLE})`}
+                        />
+                      );
+                    })}
+                    {/* 量測終點:地面標記 */}
+                    <circle cx={BEAM.x2} cy={BEAM.y2} r="3" fill={CI.cyanDeep} />
+                  </g>
+                  {/* 障礙物警示標記:量測線掃到終點後浮現 */}
+                  <g className="sg-alert sg-alert-1">
+                    <AlertTriangle
+                      x={BEAM.x2 - 14}
+                      y={BEAM.y2 - 36}
+                      size={28}
+                      color={CI.warn}
+                      strokeWidth={2}
+                      fill={CI.white}
+                    />
+                  </g>
                 </svg>
               </div>
 
-              {/* 讀數列 */}
+              {/* 偵測狀態列:掃描 → 偵測 → 預警 */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4" style={{ borderTop: `1px solid ${CI.line}` }}>
-                <span className="text-xs sm:text-sm">前方障礙物距離</span>
-                <span className="text-2xl font-semibold tabular-nums" style={{ fontFamily: MONO, color: CI.ink }}>
-                  {distance}
-                  <span className="ml-1 text-sm font-normal" style={{ color: CI.inkSoft }}>cm</span>
+                <span className="sg-alert sg-alert-2 flex items-center gap-1.5 text-sm font-semibold" style={{ color: CI.ink }}>
+                  <AlertCircle size={16} color={CI.warn} strokeWidth={2} />
+                  偵測到前方障礙物
                 </span>
                 <span
-                  className="sg-alert ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold"
+                  className="sg-alert sg-alert-3 ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold"
                   style={{
                     color: CI.mintInk,
                     backgroundColor: "rgba(95,194,164,0.14)",
@@ -724,17 +728,20 @@ export default function SmartGuardLanding() {
                   </li>
                 </ul>
               </div>
-              <div className="flex flex-col gap-6">
+              {/* 兩圖並排縮小呈現:原型照與設計圖不搶走左側論述的重心 */}
+              <div className="grid grid-cols-2 gap-4 self-center sm:gap-5">
                 <figure>
                   <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${CI.line}` }}>
                     <img
                       src={productMedia.prototype.src}
                       alt={productMedia.prototype.alt}
+                      width={productMedia.prototype.width}
+                      height={productMedia.prototype.height}
                       loading="lazy"
                       className="aspect-[4/3] w-full object-cover"
                     />
                   </div>
-                  <figcaption className="mt-2 flex items-baseline gap-2.5 text-xs" style={{ color: CI.inkSoft }}>
+                  <figcaption className="mt-2 flex flex-col gap-0.5 text-xs sm:flex-row sm:items-baseline sm:gap-2.5" style={{ color: CI.inkSoft }}>
                     <span className="font-medium tracking-[0.14em]" style={{ fontFamily: MONO, color: CI.cyanInk }}>
                       PROTOTYPE
                     </span>
@@ -742,15 +749,17 @@ export default function SmartGuardLanding() {
                   </figcaption>
                 </figure>
                 <figure>
-                  <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${CI.line}` }}>
+                  <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${CI.line}`, backgroundColor: "#EDF1F4" }}>
                     <img
                       src={productMedia.design.src}
                       alt={productMedia.design.alt}
+                      width={productMedia.design.width}
+                      height={productMedia.design.height}
                       loading="lazy"
-                      className="w-full"
+                      className="aspect-[4/3] w-full object-contain"
                     />
                   </div>
-                  <figcaption className="mt-2 flex items-baseline gap-2.5 text-xs" style={{ color: CI.inkSoft }}>
+                  <figcaption className="mt-2 flex flex-col gap-0.5 text-xs sm:flex-row sm:items-baseline sm:gap-2.5" style={{ color: CI.inkSoft }}>
                     <span className="font-medium tracking-[0.14em]" style={{ fontFamily: MONO, color: CI.cyanInk }}>
                       DESIGN
                     </span>
@@ -878,9 +887,9 @@ export default function SmartGuardLanding() {
             </div>
           </Reveal>
 
-          {/* 團隊照片 */}
+          {/* 團隊照片:桌機限寬置中,避免撐滿整個區塊 */}
           <Reveal className="mt-14">
-            <GlassCard innerClassName="p-3 sm:p-4">
+            <GlassCard className="lg:mx-auto lg:max-w-2xl" innerClassName="p-3 sm:p-4">
               <img
                 src={teamPhoto.src}
                 alt={teamPhoto.alt}
