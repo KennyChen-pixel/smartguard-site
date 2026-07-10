@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Shield,
   AlertCircle,
@@ -23,19 +23,28 @@ import {
 
 /* ============================================================
    ▼▼▼ 品牌 CI 色彩系統(自 Logo 像素級提取)▼▼▼
+   設計語彙:「臨床儀器感」——
+   Ink 承擔文字、Cyan 是儀器讀數的功能色、Mint 保留給安全/驗證語意,
+   漸層只出現在 Logo 與頁尾一條細線上。
    ============================================================ */
 const CI = {
-  cyan: "#47C2E2",        // Logo 外框・天青藍
-  cyanDeep: "#2BA8CC",    // 天青藍・深階
+  cyan: "#47C2E2",        // Logo 外框・天青藍(僅用於線條與焦點)
+  cyanDeep: "#2BA8CC",    // 天青藍・深階(圖形、量測線)
+  cyanInk: "#15718E",     // 天青藍・文字階(白底小字可讀)
   mint: "#5FC2A4",        // Logo S 字・薄荷綠
-  mintDeep: "#3FA98A",    // 薄荷綠・深階
+  mintInk: "#217A5F",     // 薄荷綠・文字階(安全/驗證語意)
   ink: "#13242E",         // 主文字・墨青
   inkSoft: "#46606E",     // 內文・霧灰青
-  mist: "#F5FAFB",        // 主背景・晨霧白
+  line: "rgba(19,36,46,0.10)", // 面板細邊框
+  mist: "#F7FAFB",        // 主背景・晨霧白
   white: "#FFFFFF",
 };
 const GRAD = `linear-gradient(135deg, ${CI.cyan} 0%, ${CI.mint} 100%)`;
-const GRAD_SOFT = `linear-gradient(135deg, rgba(71,194,226,0.45) 0%, rgba(95,194,164,0.45) 100%)`;
+
+/* 字型:IBM Plex Sans TC(內文/標題)× IBM Plex Mono(數據/讀數/專利號) */
+const SANS =
+  "'IBM Plex Sans TC','Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif";
+const MONO = "'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace";
 
 /* ============================================================
    ▼▼▼ 資料區:未來更新文字只需修改此區 ▼▼▼
@@ -111,9 +120,28 @@ const trustData = [
   { value: "92%", label: "受測長者行走安心感提升" },
 ];
 
-// 產品實照（拿到專業產品照後，將檔案放入 public 並填入路徑，例如 "/product.jpg"，
-// 核心技術區塊會自動以照片取代波紋動畫佔位）
-const productImage = "";
+// 產品影像素材
+const productMedia = {
+  // 首屏儀器面板主視覺(產品示意圖,感測模組清楚可見,作為量測線動畫起點)
+  hero: {
+    src: "/product-render-2.png",
+    width: 554,
+    height: 250,
+    alt: "SmartGuard 穿戴式防跌裝置產品示意圖：拖鞋鞋面搭載距離感測模組",
+  },
+  // 展場實測原型(核心技術區,「真實原型」證據)
+  prototype: {
+    src: "/prototype.jpg",
+    alt: "SmartGuard 防跌裝置實測原型：距離感測模組安裝於拖鞋鞋面，模組螢幕顯示即時偵測數據",
+    caption: "Medical Taiwan 展場實測原型",
+  },
+  // 量產外觀設計方向(核心技術區,與原型並列形成「原型→量產」敘事)
+  design: {
+    src: "/product-render-1.png",
+    alt: "SmartGuard 量產外觀設計示意圖：感測器內嵌於鞋面的一體化設計",
+    caption: "量產外觀設計方向",
+  },
+};
 
 // 團隊照片（關於我們區塊）
 const teamPhoto = {
@@ -150,75 +178,86 @@ function LogoMark({ size = 36 }) {
   );
 }
 
-/* ── 毛玻璃漸層邊框卡片(可選 href 變成連結)── */
+/* ── 儀器面板卡片(可選 href 變成連結;API 與舊版 GlassCard 相同)── */
 function GlassCard({ href, className = "", innerClassName = "", children, ...rest }) {
   const Tag = href ? "a" : "div";
   return (
     <Tag
       href={href}
       {...rest}
-      className={`group relative block rounded-3xl shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${
-        href ? "cursor-pointer" : ""
-      } ${className}`}
+      className={`sg-card group relative block rounded-2xl ${href ? "cursor-pointer" : ""} ${className}`}
+      style={{
+        backgroundColor: CI.white,
+        border: `1px solid ${CI.line}`,
+        boxShadow: "0 1px 2px rgba(19,36,46,0.04)",
+      }}
     >
-      {/* 漸層邊框層:hover 時透出完整 Logo 漸層 */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 rounded-3xl opacity-40 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: GRAD_SOFT }}
-      />
-      {/* 毛玻璃內層 */}
-      <span
-        aria-hidden="true"
-        className="absolute rounded-3xl backdrop-blur-md"
-        style={{
-          inset: "1.5px",
-          borderRadius: "22px",
-          backgroundColor: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-        }}
-      />
       <div className={`relative ${innerClassName}`}>{children}</div>
     </Tag>
   );
 }
 
-/* ── 滾動進場動畫:區塊進入視窗時淡入上移(原生 IntersectionObserver,無需套件)── */
-function Reveal({ className = "", delay = 0, children }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
+/* ── 區塊容器:改版後移除滾動進場動畫,內容直接呈現
+      (動畫集中在首屏唯一的量測線橋段;保留元件 API)── */
+function Reveal({ className = "", children }) {
+  return <div className={className}>{children}</div>;
+}
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
+/* ── 區塊標頭:等寬字眉標 + 標題,全站統一 ── */
+function SectionHead({ eyebrow, title, children }) {
   return (
-    <div
-      ref={ref}
-      className={`sg-reveal ${visible ? "sg-reveal-in" : ""} ${className}`}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-    >
+    <div>
+      <p
+        className="mb-3 flex items-center gap-2 text-xs font-medium tracking-[0.18em]"
+        style={{ fontFamily: MONO, color: CI.cyanInk }}
+      >
+        <span
+          aria-hidden="true"
+          className="inline-block h-2 w-2"
+          style={{ backgroundColor: CI.cyan }}
+        />
+        {eyebrow}
+      </p>
+      <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
+        {title}
+      </h2>
       {children}
     </div>
   );
 }
+
+/* ── 首屏讀數:載入後一次性從 0 跳動至目標值(尊重減少動態偏好)── */
+function useCountUp(target, { duration = 800, delay = 1100 } = {}) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setValue(target);
+      return;
+    }
+    let raf;
+    const start = performance.now() + delay;
+    const tick = (now) => {
+      const p = Math.min(1, Math.max(0, (now - start) / duration));
+      setValue(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, delay]);
+  return value;
+}
+
+/* ── 量測線刻度位置(沿感測線等距分佈,角度與線垂直)── */
+const BEAM = { x1: 310, y1: 86, x2: 48, y2: 205 };
+const BEAM_ANGLE =
+  (Math.atan2(BEAM.y2 - BEAM.y1, BEAM.x2 - BEAM.x1) * 180) / Math.PI;
+const beamPoint = (t) => ({
+  x: BEAM.x1 + (BEAM.x2 - BEAM.x1) * t,
+  y: BEAM.y1 + (BEAM.y2 - BEAM.y1) * t,
+});
 
 export default function SmartGuardLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -234,6 +273,9 @@ export default function SmartGuardLanding() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // 首屏儀器面板讀數:量測線掃出後,距離值一次性跳動定格
+  const distance = useCountUp(42);
 
   // 按 Esc 關閉行動選單
   useEffect(() => {
@@ -320,8 +362,7 @@ export default function SmartGuardLanding() {
       style={{
         backgroundColor: CI.mist,
         color: CI.inkSoft,
-        fontFamily:
-          "'Noto Sans TC','Inter',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif",
+        fontFamily: SANS,
       }}
     >
       <style>{`
@@ -329,44 +370,44 @@ export default function SmartGuardLanding() {
         html { scroll-behavior: smooth; }
         section[id] { scroll-margin-top: 84px; }
 
-        @keyframes sg-ripple {
-          0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 0.5; }
-          70%  { opacity: 0.15; }
-          100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
-        }
-        .sg-ripple {
-          position: absolute; left: 50%; top: 50%;
-          border-radius: 9999px;
-          border: 1.5px solid rgba(71,194,226,0.45);
-          animation: sg-ripple 5.5s cubic-bezier(0.2,0.6,0.4,1) infinite;
-          pointer-events: none;
-        }
+        /* ── 首屏唯一動畫橋段 ──
+           文字浮現 → 量測線自感測模組掃出 → 距離讀數跳動 → 預警標記亮起,
+           之後全頁靜止。 */
         @keyframes sg-fade-up {
-          from { opacity: 0; transform: translateY(26px); }
+          from { opacity: 0; transform: translateY(18px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .sg-fade-up { animation: sg-fade-up 0.9s ease-out both; }
-        .sg-d1 { animation-delay: .15s; } .sg-d2 { animation-delay: .3s; } .sg-d3 { animation-delay: .45s; }
+        .sg-fade-up { animation: sg-fade-up 0.7s ease-out both; }
+        .sg-d1 { animation-delay: .12s; } .sg-d2 { animation-delay: .3s; }
 
-        @keyframes sg-float {
-          0%,100% { transform: translateY(0); }
-          50%     { transform: translateY(-14px); }
+        @keyframes sg-sweep {
+          from { clip-path: inset(0 0 0 100%); }
+          to   { clip-path: inset(0 0 0 0); }
         }
-        .sg-float { animation: sg-float 7s ease-in-out infinite; }
+        .sg-beam { animation: sg-sweep 0.9s ease-out 0.8s both; }
 
-        /* 滾動進場:初始隱藏,進入視窗後淡入上移 */
-        .sg-reveal {
-          opacity: 0;
-          transform: translateY(26px);
-          transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        @keyframes sg-appear {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        .sg-reveal-in { opacity: 1; transform: translateY(0); }
+        .sg-alert { animation: sg-appear 0.5s ease-out 2s both; }
 
         @media (prefers-reduced-motion: reduce) {
           html { scroll-behavior: auto; }
-          .sg-ripple, .sg-fade-up, .sg-float { animation: none !important; opacity: 1; }
-          .sg-reveal { opacity: 1; transform: none; transition: none; }
+          .sg-fade-up, .sg-beam, .sg-alert { animation: none !important; }
         }
+
+        /* 主要按鈕:hover 微調底色,不做縮放 */
+        .sg-btn { transition: background-color 0.2s ease; }
+        .sg-btn:hover { background-color: #1E3947 !important; }
+
+        /* 連結卡片:hover 邊框轉為品牌天青,像儀器面板被選取 */
+        .sg-card { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        a.sg-card:hover {
+          border-color: rgba(71,194,226,0.65);
+          box-shadow: 0 6px 20px rgba(19,36,46,0.08);
+        }
+
         .sg-input:focus {
           outline: none;
           border-color: ${CI.cyan};
@@ -378,30 +419,27 @@ export default function SmartGuardLanding() {
         .sg-input-error:focus {
           box-shadow: 0 0 0 3px rgba(209,67,67,0.15);
         }
-        .sg-grad-text {
-          background: ${GRAD};
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
       `}</style>
 
       {/* ───────────── 導覽列 ───────────── */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
+        className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(71,194,226,0.18)",
+          backgroundColor: "rgba(255,255,255,0.92)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          borderBottom: `1px solid ${CI.line}`,
         }}
       >
         <nav aria-label="主要導覽" className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4">
           <a href="#hero" className="flex items-center gap-2.5" onClick={closeMenu}>
             <LogoMark size={34} />
-            <span className="text-base font-bold tracking-wide" style={{ color: CI.ink, fontFamily: "'M PLUS Rounded 1c','Noto Sans TC',sans-serif" }}>
+            <span className="text-base font-bold tracking-wide" style={{ color: CI.ink }}>
               智感先鋒科技
-              <span className="ml-2 hidden text-xs font-semibold tracking-widest md:inline" style={{ color: CI.cyanDeep, fontFamily: "'Inter',sans-serif" }}>
+              <span
+                className="ml-2 hidden text-[11px] font-medium tracking-[0.14em] md:inline"
+                style={{ color: CI.cyanInk, fontFamily: MONO }}
+              >
                 SMARTGUARD TECH
               </span>
             </span>
@@ -416,8 +454,8 @@ export default function SmartGuardLanding() {
             ))}
             <a
               href="#contact"
-              className="rounded-full px-5 py-2 font-bold text-white shadow-md transition-transform hover:scale-105"
-              style={{ background: GRAD }}
+              className="sg-btn rounded-lg px-5 py-2 font-semibold text-white"
+              style={{ backgroundColor: CI.ink }}
             >
               聯絡我們
             </a>
@@ -429,7 +467,7 @@ export default function SmartGuardLanding() {
             aria-label={menuOpen ? "關閉選單" : "開啟選單"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors md:hidden"
             style={{ color: CI.ink, backgroundColor: menuOpen ? "rgba(71,194,226,0.12)" : "transparent" }}
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -441,10 +479,8 @@ export default function SmartGuardLanding() {
           <div
             className="border-t md:hidden"
             style={{
-              borderColor: "rgba(71,194,226,0.15)",
-              backgroundColor: "rgba(255,255,255,0.92)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
+              borderColor: CI.line,
+              backgroundColor: "rgba(255,255,255,0.97)",
             }}
           >
             <div className="flex flex-col gap-1 px-5 py-4">
@@ -453,7 +489,7 @@ export default function SmartGuardLanding() {
                   key={l.href}
                   href={l.href}
                   onClick={closeMenu}
-                  className="rounded-xl px-4 py-3 text-base font-medium transition-colors"
+                  className="rounded-lg px-4 py-3 text-base font-medium transition-colors"
                   style={{ color: CI.ink }}
                 >
                   {l.label}
@@ -462,8 +498,8 @@ export default function SmartGuardLanding() {
               <a
                 href="#contact"
                 onClick={closeMenu}
-                className="mt-2 rounded-xl px-4 py-3 text-center text-base font-bold text-white"
-                style={{ background: GRAD }}
+                className="mt-2 rounded-lg px-4 py-3 text-center text-base font-semibold text-white"
+                style={{ backgroundColor: CI.ink }}
               >
                 聯絡我們
               </a>
@@ -482,53 +518,36 @@ export default function SmartGuardLanding() {
       )}
 
       {/* ───────────── Hero ───────────── */}
-      <section id="hero" className="relative overflow-hidden">
-        {/* 品牌色柔光暈 */}
-        <div
-          aria-hidden="true"
-          className="absolute -top-32 -left-32 h-96 w-96 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(71,194,226,0.22) 0%, transparent 70%)", filter: "blur(60px)" }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute top-1/3 -right-40 h-[34rem] w-[34rem] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(95,194,164,0.2) 0%, transparent 70%)", filter: "blur(70px)" }}
-        />
-
-        <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-28 pt-36 sm:px-6 md:pb-36 md:pt-44 lg:grid-cols-2 lg:gap-10">
-          <div>
-            <p className="sg-fade-up mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-[0.2em] sm:text-sm"
-              style={{ color: CI.cyanDeep, backgroundColor: "rgba(71,194,226,0.1)", border: "1px solid rgba(71,194,226,0.25)" }}
+      <section id="hero" className="relative">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-32 sm:px-6 md:pb-24 md:pt-40 lg:grid-cols-2 lg:gap-14">
+          <div className="sg-fade-up">
+            <p
+              className="mb-6 flex items-center gap-2 text-xs font-medium tracking-[0.18em] sm:text-[13px]"
+              style={{ fontFamily: MONO, color: CI.cyanInk }}
             >
-              SMARTGUARD・智慧銀髮跌倒防護系統
+              <span aria-hidden="true" className="inline-block h-2 w-2" style={{ backgroundColor: CI.cyan }} />
+              SMARTGUARD · AI 驅動主動防跌技術
             </p>
             <h1
-              className="sg-fade-up sg-d1 text-3xl font-black leading-snug sm:text-5xl lg:text-6xl sm:whitespace-nowrap"
-              style={{ color: CI.ink, letterSpacing: "0.02em" }}
+              className="text-4xl font-bold leading-tight sm:text-5xl lg:text-[3.4rem]"
+              style={{ color: CI.ink, letterSpacing: "0.01em" }}
             >
-              智慧感測 主動守護
+              智慧感測，
+              <br className="sm:hidden" />
+              主動守護
             </h1>
-            <p
-              className="sg-fade-up sg-d1 sg-grad-text mt-3 text-lg font-bold sm:whitespace-nowrap sm:text-2xl lg:text-3xl"
-              style={{ letterSpacing: "0.02em" }}
-            >
+            <p className="mt-4 text-lg font-semibold sm:text-xl" style={{ color: CI.cyanInk }}>
               重新定義銀髮安全新標準
             </p>
-            <p
-              className="sg-fade-up sg-d1 mt-2 text-sm sm:text-base font-medium"
-              style={{ color: CI.inkSoft }}
-            >
-              AI 驅動的主動防跌技術
-            </p>
-            <p className="sg-fade-up sg-d2 mt-7 max-w-xl text-base leading-relaxed sm:text-lg">
-              專為長者設計的跌倒預防設備，以獨家距離感測技術即時偵測環境風險，
+            <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg">
+              專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險，
               在跌倒發生「之前」就築起防線。
             </p>
-            <div className="sg-fade-up sg-d3 mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-10 flex flex-wrap items-center gap-5">
               <a
                 href="#contact"
-                className="rounded-full px-8 py-3.5 text-base font-bold text-white transition-transform hover:scale-105"
-                style={{ background: GRAD, boxShadow: "0 10px 32px rgba(71,194,226,0.4)" }}
+                className="sg-btn rounded-lg px-7 py-3 text-base font-semibold text-white"
+                style={{ backgroundColor: CI.ink }}
               >
                 預約產品展示
               </a>
@@ -542,36 +561,98 @@ export default function SmartGuardLanding() {
             </div>
           </div>
 
-          {/* 感測波紋 × 品牌標誌 */}
-          <div className="relative mx-auto flex aspect-square w-64 items-center justify-center sm:w-80 lg:w-full lg:max-w-md">
-            <span className="sg-ripple h-full w-full" />
-            <span className="sg-ripple h-full w-full" style={{ animationDelay: "1.4s" }} />
-            <span className="sg-ripple h-full w-full" style={{ animationDelay: "2.8s", borderColor: "rgba(95,194,164,0.4)" }} />
-            <span className="sg-ripple h-full w-full" style={{ animationDelay: "4.2s" }} />
+          {/* 儀器面板:產品示意 × 距離量測(全站唯一動畫橋段) */}
+          <div className="sg-fade-up sg-d2">
             <div
-              className="sg-float relative flex h-36 w-36 items-center justify-center rounded-[2rem] sm:h-44 sm:w-44"
+              className="overflow-hidden rounded-2xl"
               style={{
-                backgroundColor: "rgba(255,255,255,0.75)",
-                backdropFilter: "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-                border: "1.5px solid rgba(71,194,226,0.3)",
-                boxShadow: "0 24px 60px rgba(71,194,226,0.25)",
+                backgroundColor: CI.white,
+                border: `1px solid ${CI.line}`,
+                boxShadow: "0 24px 48px -24px rgba(19,36,46,0.18)",
               }}
             >
-              <LogoMark size={86} />
+              {/* 面板標頭 */}
+              <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${CI.line}` }}>
+                <span className="text-[11px] font-medium tracking-[0.14em]" style={{ fontFamily: MONO, color: CI.cyanInk }}>
+                  SG-01 · DISTANCE SENSING
+                </span>
+                <span className="text-[11px]" style={{ color: CI.inkSoft }}>
+                  產品示意圖
+                </span>
+              </div>
+
+              {/* 產品影像 + 量測線 */}
+              <div className="relative" style={{ backgroundColor: "#EDF1F4" }}>
+                <img
+                  src={productMedia.hero.src}
+                  alt={productMedia.hero.alt}
+                  width={productMedia.hero.width}
+                  height={productMedia.hero.height}
+                  className="w-full"
+                />
+                <svg
+                  aria-hidden="true"
+                  className="sg-beam pointer-events-none absolute inset-0 h-full w-full"
+                  viewBox="0 0 554 250"
+                  fill="none"
+                >
+                  {/* 感測起點:模組位置 */}
+                  <circle cx={BEAM.x1} cy={BEAM.y1} r="4" fill={CI.cyanDeep} />
+                  <circle cx={BEAM.x1} cy={BEAM.y1} r="9" stroke={CI.cyanDeep} strokeWidth="1.2" opacity="0.5" />
+                  {/* 量測虛線:模組 → 前方地面 */}
+                  <line
+                    x1={BEAM.x1} y1={BEAM.y1} x2={BEAM.x2} y2={BEAM.y2}
+                    stroke={CI.cyanDeep} strokeWidth="1.4" strokeDasharray="7 5"
+                  />
+                  {/* 尺規刻度 */}
+                  {[0.25, 0.5, 0.75].map((t) => {
+                    const p = beamPoint(t);
+                    return (
+                      <line
+                        key={t}
+                        x1="0" y1="-6" x2="0" y2="6"
+                        stroke={CI.cyanDeep} strokeWidth="1.2"
+                        transform={`translate(${p.x} ${p.y}) rotate(${BEAM_ANGLE})`}
+                      />
+                    );
+                  })}
+                  {/* 量測終點:前方障礙物 */}
+                  <circle cx={BEAM.x2} cy={BEAM.y2} r="7" stroke={CI.cyanDeep} strokeWidth="1.4" />
+                  <circle cx={BEAM.x2} cy={BEAM.y2} r="2.5" fill={CI.cyanDeep} />
+                </svg>
+              </div>
+
+              {/* 讀數列 */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4" style={{ borderTop: `1px solid ${CI.line}` }}>
+                <span className="text-xs sm:text-sm">前方障礙物距離</span>
+                <span className="text-2xl font-semibold tabular-nums" style={{ fontFamily: MONO, color: CI.ink }}>
+                  {distance}
+                  <span className="ml-1 text-sm font-normal" style={{ color: CI.inkSoft }}>cm</span>
+                </span>
+                <span
+                  className="sg-alert ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold"
+                  style={{
+                    color: CI.mintInk,
+                    backgroundColor: "rgba(95,194,164,0.14)",
+                    border: "1px solid rgba(95,194,164,0.45)",
+                  }}
+                >
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: CI.mint }} />
+                  已於跌倒前預警
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 信任數據列 */}
-        <div className="relative mx-auto max-w-6xl px-5 pb-24 sm:px-6">
-          <GlassCard innerClassName="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0"
-          >
+        <div className="relative mx-auto max-w-6xl px-5 pb-20 sm:px-6">
+          <GlassCard innerClassName="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             {trustData.map((t) => (
-              <div key={t.label} className="flex flex-col items-center gap-1 px-4 py-7 text-center" style={{ borderColor: "rgba(71,194,226,0.12)" }}>
+              <div key={t.label} className="flex flex-col items-center gap-1 px-4 py-6 text-center" style={{ borderColor: CI.line }}>
                 <span
-                  className="text-lg font-extrabold tracking-wide sm:text-xl"
-                  style={{ color: CI.cyanDeep, fontFamily: "'Inter','Noto Sans TC',sans-serif" }}
+                  className="text-lg font-semibold tabular-nums sm:text-xl"
+                  style={{ color: CI.ink, fontFamily: MONO }}
                 >
                   {t.value}
                 </span>
@@ -583,37 +664,31 @@ export default function SmartGuardLanding() {
       </section>
 
       {/* ───────────── 核心技術 ───────────── */}
-      <section id="tech" className="relative py-28 md:py-36">
-        <div
-          aria-hidden="true"
-          className="absolute left-1/2 top-0 h-80 w-80 -translate-x-1/2 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(95,194,164,0.14) 0%, transparent 70%)", filter: "blur(60px)" }}
-        />
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-6">
+      <section id="tech" className="py-24 md:py-32" style={{ backgroundColor: CI.white, borderTop: `1px solid ${CI.line}`, borderBottom: `1px solid ${CI.line}` }}>
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <Reveal>
-            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.mintDeep }}>
-              CORE TECHNOLOGY
-            </p>
-            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-              核心技術與產品特點
-            </h2>
-            <p className="mt-5 max-w-3xl leading-relaxed">
-              我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，
-              進化為<strong style={{ color: CI.ink }}>主動預防跌倒</strong>。
-            </p>
+            <SectionHead eyebrow="CORE TECHNOLOGY" title="核心技術與產品特點">
+              <p className="mt-5 max-w-3xl leading-relaxed">
+                我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，
+                進化為<strong style={{ color: CI.ink }}>主動預防跌倒</strong>。
+              </p>
+            </SectionHead>
           </Reveal>
 
-          <div className="mt-16 grid gap-7 sm:grid-cols-2">
-            {productsData.map((p, i) => {
+          <div className="mt-14 grid gap-6 sm:grid-cols-2">
+            {productsData.map((p) => {
               const Icon = iconMap[p.icon] || Shield;
               return (
-                <Reveal key={p.title} delay={(i % 2) * 120} className="h-full">
+                <Reveal key={p.title} className="h-full">
                   <GlassCard className="h-full" innerClassName="p-8">
                     <span
-                      className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl"
-                      style={{ background: GRAD_SOFT }}
+                      className="mb-6 flex h-11 w-11 items-center justify-center rounded-lg"
+                      style={{
+                        border: "1px solid rgba(71,194,226,0.45)",
+                        backgroundColor: "rgba(71,194,226,0.08)",
+                      }}
                     >
-                      <Icon size={27} color={CI.ink} strokeWidth={1.8} />
+                      <Icon size={22} color={CI.cyanInk} strokeWidth={1.8} />
                     </span>
                     <h3 className="mb-3 text-lg font-bold sm:text-xl" style={{ color: CI.ink }}>
                       {p.title}
@@ -625,47 +700,63 @@ export default function SmartGuardLanding() {
             })}
           </div>
 
-          {/* 差異化說明 */}
-          <Reveal className="mt-20">
+          {/* 差異化說明:左側論述,右側「實測原型 → 量產設計」影像敘事 */}
+          <Reveal className="mt-16">
             <GlassCard innerClassName="grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-2">
               <div>
-                <h3 className="text-xl font-black leading-snug sm:text-2xl" style={{ color: CI.ink }}>
+                <h3 className="text-xl font-bold leading-snug sm:text-2xl" style={{ color: CI.ink }}>
                   距離感測 ≠ 傳統 IMU
                   <br />
-                  <span className="sg-grad-text">預防，發生在跌倒之前</span>
+                  <span style={{ color: CI.cyanInk }}>預防，發生在跌倒之前</span>
                 </h3>
                 <ul className="mt-7 space-y-5 text-sm leading-relaxed">
                   <li className="flex gap-3">
-                    <Eye size={18} color={CI.cyanDeep} className="mt-0.5 shrink-0" />
+                    <Eye size={18} color={CI.cyanInk} className="mt-0.5 shrink-0" />
                     即時掃描長者與環境間的空間距離，於碰撞風險形成前主動預警。
                   </li>
                   <li className="flex gap-3">
-                    <Radio size={18} color={CI.mintDeep} className="mt-0.5 shrink-0" />
+                    <Radio size={18} color={CI.mintInk} className="mt-0.5 shrink-0" />
                     不依賴跌倒後的姿態判讀，真正做到「事前防護」而非「事後通報」。
                   </li>
                   <li className="flex gap-3">
-                    <HeartHandshake size={18} color={CI.cyanDeep} className="mt-0.5 shrink-0" />
+                    <HeartHandshake size={18} color={CI.cyanInk} className="mt-0.5 shrink-0" />
                     輕量無感配戴，讓守護自然融入長輩的每一步日常。
                   </li>
                 </ul>
               </div>
-              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl"
-                style={{ background: "linear-gradient(135deg, rgba(71,194,226,0.12), rgba(95,194,164,0.12))" }}
-              >
-                {productImage ? (
-                  <img
-                    src={productImage}
-                    alt="SmartGuard 穿戴式跌倒預防裝置產品實照，展示輕量化距離感測模組"
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="relative flex h-32 w-32 items-center justify-center">
-                    <span className="sg-ripple h-full w-full" />
-                    <span className="sg-ripple h-full w-full" style={{ animationDelay: "2.7s" }} />
-                    <Shield size={52} color={CI.mintDeep} strokeWidth={1.5} />
+              <div className="flex flex-col gap-6">
+                <figure>
+                  <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${CI.line}` }}>
+                    <img
+                      src={productMedia.prototype.src}
+                      alt={productMedia.prototype.alt}
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover"
+                    />
                   </div>
-                )}
+                  <figcaption className="mt-2 flex items-baseline gap-2.5 text-xs" style={{ color: CI.inkSoft }}>
+                    <span className="font-medium tracking-[0.14em]" style={{ fontFamily: MONO, color: CI.cyanInk }}>
+                      PROTOTYPE
+                    </span>
+                    {productMedia.prototype.caption}
+                  </figcaption>
+                </figure>
+                <figure>
+                  <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${CI.line}` }}>
+                    <img
+                      src={productMedia.design.src}
+                      alt={productMedia.design.alt}
+                      loading="lazy"
+                      className="w-full"
+                    />
+                  </div>
+                  <figcaption className="mt-2 flex items-baseline gap-2.5 text-xs" style={{ color: CI.inkSoft }}>
+                    <span className="font-medium tracking-[0.14em]" style={{ fontFamily: MONO, color: CI.cyanInk }}>
+                      DESIGN
+                    </span>
+                    {productMedia.design.caption}
+                  </figcaption>
+                </figure>
               </div>
             </GlassCard>
           </Reveal>
@@ -673,45 +764,33 @@ export default function SmartGuardLanding() {
       </section>
 
       {/* ───────────── 最新消息 / 榮譽專利 ───────────── */}
-      <section id="news" className="relative py-28 md:py-36">
-        <div
-          aria-hidden="true"
-          className="absolute -left-32 top-1/3 h-96 w-96 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(71,194,226,0.14) 0%, transparent 70%)", filter: "blur(70px)" }}
-        />
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-6">
+      <section id="news" className="py-24 md:py-32">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <Reveal>
-            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.cyanDeep }}>
-              NEWS & HONORS
-            </p>
-            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-              最新消息與榮譽
-            </h2>
+            <SectionHead eyebrow="NEWS & HONORS" title="最新消息與榮譽" />
           </Reveal>
 
-          {/* 垂直時間軸:左側漸層軸線 + 年份節點,由新到舊 */}
-          <div className="relative mx-auto mt-16 max-w-3xl">
+          {/* 垂直時間軸:由新到舊,順序本身就是資訊 */}
+          <div className="relative mx-auto mt-14 max-w-3xl">
             <span
               aria-hidden="true"
-              className="absolute bottom-6 left-[23px] top-6 w-px sm:left-6"
-              style={{ background: GRAD, opacity: 0.35 }}
+              className="absolute bottom-6 left-[17px] top-6 w-px"
+              style={{ backgroundColor: "rgba(19,36,46,0.14)" }}
             />
             {(showAllNews ? newsData : newsData.slice(0, 3)).map((n) => {
               const Icon = iconMap[n.icon] || Award;
               const hasLink = n.url && n.url !== "#";
               return (
-                <Reveal key={n.title} className="relative flex gap-5 pb-8 last:pb-0 sm:gap-7">
+                <Reveal key={n.title} className="relative flex gap-5 pb-7 last:pb-0 sm:gap-6">
                   {/* 時間軸節點 */}
                   <span
-                    className="relative z-10 mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+                    className="relative z-10 mt-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
                     style={{
                       backgroundColor: CI.white,
-                      backgroundImage: GRAD_SOFT,
-                      border: "1.5px solid rgba(71,194,226,0.35)",
-                      boxShadow: "0 4px 14px rgba(71,194,226,0.18)",
+                      border: "1px solid rgba(71,194,226,0.55)",
                     }}
                   >
-                    <Icon size={22} color={CI.ink} strokeWidth={1.8} />
+                    <Icon size={16} color={CI.cyanInk} strokeWidth={1.8} />
                   </span>
                   <GlassCard
                     href={hasLink ? n.url : undefined}
@@ -723,8 +802,8 @@ export default function SmartGuardLanding() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <time
-                          className="text-xs font-bold tracking-widest"
-                          style={{ color: CI.mintDeep, fontFamily: "'Inter',sans-serif" }}
+                          className="text-xs font-medium tracking-[0.14em]"
+                          style={{ color: CI.cyanInk, fontFamily: MONO }}
                         >
                           {n.date}
                         </time>
@@ -735,8 +814,8 @@ export default function SmartGuardLanding() {
                       {hasLink && (
                         <ArrowUpRight
                           size={20}
-                          className="mt-1 shrink-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                          style={{ color: CI.cyanDeep }}
+                          className="mt-1 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                          style={{ color: CI.cyanInk }}
                         />
                       )}
                     </div>
@@ -747,12 +826,16 @@ export default function SmartGuardLanding() {
           </div>
 
           {newsData.length > 3 && (
-            <div className="mt-12 flex justify-center">
+            <div className="mt-10 flex justify-center">
               <button
                 type="button"
                 onClick={() => setShowAllNews((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full px-6 py-2.5 text-sm font-bold transition-transform hover:scale-105"
-                style={{ color: CI.cyanDeep, border: `1.5px solid ${CI.cyan}`, backgroundColor: "rgba(71,194,226,0.06)" }}
+                className="flex items-center gap-1.5 rounded-lg px-6 py-2.5 text-sm font-semibold transition-colors hover:border-current"
+                style={{
+                  color: CI.cyanInk,
+                  border: "1px solid rgba(19,36,46,0.18)",
+                  backgroundColor: CI.white,
+                }}
               >
                 {showAllNews ? "收合內容" : `查看更多（共 ${newsData.length} 則）`}
                 <ChevronDown
@@ -767,20 +850,12 @@ export default function SmartGuardLanding() {
       </section>
 
       {/* ───────────── 關於我們 ───────────── */}
-      <section id="about" className="relative py-28 md:py-36">
-        <div
-          aria-hidden="true"
-          className="absolute -right-32 top-0 h-96 w-96 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(95,194,164,0.16) 0%, transparent 70%)", filter: "blur(70px)" }}
-        />
-        <div className="relative mx-auto max-w-4xl px-5 text-center sm:px-6">
+      <section id="about" className="py-24 md:py-32" style={{ backgroundColor: CI.white, borderTop: `1px solid ${CI.line}`, borderBottom: `1px solid ${CI.line}` }}>
+        <div className="mx-auto max-w-4xl px-5 text-center sm:px-6">
           <Reveal>
-            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.mintDeep }}>
-              ABOUT US
-            </p>
-            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-              科技更有溫度 用智慧守護摯愛
-            </h2>
+            <div className="flex justify-center">
+              <SectionHead eyebrow="ABOUT US" title="科技更有溫度 用智慧守護摯愛" />
+            </div>
 
             <blockquote className="mx-auto mt-12 max-w-2xl text-base font-semibold leading-loose sm:text-lg" style={{ color: CI.ink }}>
               「智感先鋒科技的誕生，源於一個簡單卻深刻的初心——
@@ -812,8 +887,7 @@ export default function SmartGuardLanding() {
                 width={teamPhoto.width}
                 height={teamPhoto.height}
                 loading="lazy"
-                className="w-full object-cover"
-                style={{ borderRadius: "16px" }}
+                className="w-full rounded-xl object-cover"
               />
               <p className="px-2 pb-1.5 pt-4 text-center text-xs leading-relaxed sm:text-sm" style={{ color: CI.inkSoft }}>
                 {teamPhoto.caption}
@@ -824,33 +898,24 @@ export default function SmartGuardLanding() {
       </section>
 
       {/* ───────────── 聯絡表單 ───────────── */}
-      <section id="contact" className="relative py-28 md:py-36">
-        <div
-          aria-hidden="true"
-          className="absolute left-1/4 bottom-0 h-96 w-96 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(71,194,226,0.16) 0%, transparent 70%)", filter: "blur(70px)" }}
-        />
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-5 sm:px-6 lg:grid-cols-5">
+      <section id="contact" className="py-24 md:py-32">
+        <div className="mx-auto grid max-w-6xl gap-12 px-5 sm:px-6 lg:grid-cols-5">
           <Reveal className="lg:col-span-2">
-            <p className="mb-3 text-xs font-bold tracking-[0.3em] sm:text-sm" style={{ color: CI.cyanDeep }}>
-              CONTACT
-            </p>
-            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: CI.ink }}>
-              商務合作與產品諮詢
-            </h2>
-            <p className="mt-5 leading-relaxed">
-              無論您是照護機構、通路夥伴或關心家中長輩的家屬，
-              歡迎與我們聯繫，我們將於三個工作天內回覆。
-            </p>
-            <ul className="mt-9 space-y-4 text-sm">
+            <SectionHead eyebrow="CONTACT" title="商務合作與產品諮詢">
+              <p className="mt-5 leading-relaxed">
+                無論您是照護機構、通路夥伴或關心家中長輩的家屬，
+                歡迎與我們聯繫，我們將於三個工作天內回覆。
+              </p>
+            </SectionHead>
+            <ul className="mt-9 space-y-4 text-sm" style={{ fontFamily: MONO }}>
               <li className="flex items-center gap-3">
-                <Mail size={18} color={CI.cyanDeep} /> k3070447@gmail.com
+                <Mail size={17} color={CI.cyanInk} /> k3070447@gmail.com
               </li>
               <li className="flex items-center gap-3">
-                <Phone size={18} color={CI.mintDeep} /> 0966-312-546
+                <Phone size={17} color={CI.mintInk} /> 0966-312-546
               </li>
-              <li className="flex items-center gap-3">
-                <MapPin size={18} color={CI.cyanDeep} /> 高雄市鼓山區蓮海路 70 號
+              <li className="flex items-center gap-3" style={{ fontFamily: SANS }}>
+                <MapPin size={17} color={CI.cyanInk} /> 高雄市鼓山區蓮海路 70 號
               </li>
             </ul>
           </Reveal>
@@ -859,7 +924,7 @@ export default function SmartGuardLanding() {
             <GlassCard innerClassName="p-7 sm:p-10">
               {submitted ? (
                 <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
-                  <CheckCircle2 size={48} color={CI.mintDeep} />
+                  <CheckCircle2 size={48} color={CI.mintInk} />
                   <h3 className="text-xl font-bold" style={{ color: CI.ink }}>
                     已收到您的訊息
                   </h3>
@@ -867,8 +932,12 @@ export default function SmartGuardLanding() {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="mt-2 flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-bold transition-transform hover:scale-105"
-                    style={{ color: CI.cyanDeep, border: `1.5px solid ${CI.cyan}`, backgroundColor: "rgba(71,194,226,0.06)" }}
+                    className="mt-2 flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold transition-colors"
+                    style={{
+                      color: CI.cyanInk,
+                      border: "1px solid rgba(19,36,46,0.18)",
+                      backgroundColor: CI.white,
+                    }}
                   >
                     <RotateCcw size={15} /> 填寫新的訊息
                   </button>
@@ -884,8 +953,8 @@ export default function SmartGuardLanding() {
                       placeholder="王小明"
                       autoComplete="name"
                       aria-invalid={!!fieldErrors.name}
-                      className={`sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all ${fieldErrors.name ? "sg-input-error" : ""}`}
-                      style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
+                      className={`sg-input rounded-lg border bg-white px-4 py-3 text-sm font-normal transition-all ${fieldErrors.name ? "sg-input-error" : ""}`}
+                      style={{ borderColor: "rgba(19,36,46,0.18)", color: CI.ink }}
                     />
                     {fieldErrors.name && (
                       <span role="alert" className="flex items-center gap-1 text-xs font-medium" style={{ color: "#D14343" }}>
@@ -901,8 +970,8 @@ export default function SmartGuardLanding() {
                       onChange={handleChange("org")}
                       placeholder="○○長照機構"
                       autoComplete="organization"
-                      className="sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all"
-                      style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
+                      className="sg-input rounded-lg border bg-white px-4 py-3 text-sm font-normal transition-all"
+                      style={{ borderColor: "rgba(19,36,46,0.18)", color: CI.ink }}
                     />
                   </label>
                   <label className="flex flex-col gap-1.5 text-sm font-semibold" style={{ color: CI.ink }}>
@@ -914,8 +983,8 @@ export default function SmartGuardLanding() {
                       placeholder="you@example.com"
                       autoComplete="email"
                       aria-invalid={!!fieldErrors.email}
-                      className={`sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all ${fieldErrors.email ? "sg-input-error" : ""}`}
-                      style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
+                      className={`sg-input rounded-lg border bg-white px-4 py-3 text-sm font-normal transition-all ${fieldErrors.email ? "sg-input-error" : ""}`}
+                      style={{ borderColor: "rgba(19,36,46,0.18)", color: CI.ink }}
                     />
                     {fieldErrors.email && (
                       <span role="alert" className="flex items-center gap-1 text-xs font-medium" style={{ color: "#D14343" }}>
@@ -928,8 +997,8 @@ export default function SmartGuardLanding() {
                     <select
                       value={form.type}
                       onChange={handleChange("type")}
-                      className="sg-input rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all"
-                      style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
+                      className="sg-input rounded-lg border bg-white px-4 py-3 text-sm font-normal transition-all"
+                      style={{ borderColor: "rgba(19,36,46,0.18)", color: CI.ink }}
                     >
                       <option>產品諮詢</option>
                       <option>商務合作</option>
@@ -944,15 +1013,15 @@ export default function SmartGuardLanding() {
                       value={form.message}
                       onChange={handleChange("message")}
                       placeholder="請簡述您的需求…"
-                      className="sg-input resize-none rounded-xl border bg-white px-4 py-3 text-sm font-normal transition-all"
-                      style={{ borderColor: "rgba(71,194,226,0.3)", color: CI.ink }}
+                      className="sg-input resize-none rounded-lg border bg-white px-4 py-3 text-sm font-normal transition-all"
+                      style={{ borderColor: "rgba(19,36,46,0.18)", color: CI.ink }}
                     />
                   </label>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100 sm:col-span-2"
-                    style={{ background: GRAD, boxShadow: "0 8px 26px rgba(71,194,226,0.35)" }}
+                    className="sg-btn flex items-center justify-center gap-2 rounded-lg py-3.5 text-base font-semibold text-white disabled:opacity-60 sm:col-span-2"
+                    style={{ backgroundColor: CI.ink }}
                   >
                     <Send size={18} /> {submitting ? "送出中…" : "送出諮詢"}
                   </button>
@@ -972,9 +1041,9 @@ export default function SmartGuardLanding() {
       <footer
         className="relative"
         style={{
-          backgroundColor: "rgba(255,255,255,0.6)",
+          backgroundColor: CI.white,
           borderTop: "1.5px solid transparent",
-          borderImage: `${GRAD} 1`,
+          borderImage: `${GRAD} 1`, // 全站唯一一條漸層線,呼應 Logo
         }}
       >
         <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6">
@@ -982,7 +1051,7 @@ export default function SmartGuardLanding() {
             <div className="flex items-center gap-3">
               <LogoMark size={32} />
               <div>
-                <p className="text-sm font-bold" style={{ color: CI.ink, fontFamily: "'M PLUS Rounded 1c','Noto Sans TC',sans-serif" }}>
+                <p className="text-sm font-bold" style={{ color: CI.ink }}>
                   智感先鋒科技 SmartGuard Technology
                 </p>
                 <p className="text-xs">智慧感測 主動守護</p>
@@ -998,7 +1067,7 @@ export default function SmartGuardLanding() {
           </div>
           <div
             className="mt-10 flex flex-col gap-2 pt-6 text-xs sm:flex-row sm:justify-center"
-            style={{ borderTop: "1px solid rgba(71,194,226,0.18)" }}
+            style={{ borderTop: `1px solid ${CI.line}` }}
           >
             <p>© {new Date().getFullYear()} 智感先鋒科技 SmartGuard Technology. All rights reserved.</p>
           </div>
