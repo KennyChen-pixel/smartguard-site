@@ -20,6 +20,7 @@ import {
   Send,
   CheckCircle2,
   ChevronDown,
+  Linkedin,
 } from "lucide-react";
 
 /* ============================================================
@@ -83,6 +84,13 @@ const productsData = [
 // 最新消息 / 榮譽獎項（url 預留：之後填入新聞稿或公告連結）
 // 請將最新的消息放在陣列最上方（由新到舊排列）
 const newsData = [
+  {
+    date: "2026/08/05-08/06",
+    title:
+      "智感先鋒科技將參展 2026 第二屆 BIOMED-X 生醫新創媒合博覽會，歡迎蒞臨交流",
+    icon: "Radio",
+    url: "https://www.biomed-x.com.tw/",
+  },
   {
     date: "2026",
     title: "智感先鋒科技將於 6/25-27 Medical Taiwan 2026 展出主動式防跌系統",
@@ -1066,13 +1074,25 @@ export default function SmartGuardLanding() {
                 <p className="text-xs">智慧感測 主動守護</p>
               </div>
             </div>
-            <nav aria-label="頁尾連結" className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
-              {navLinks.map((l) => (
-                <a key={l.href} href={l.href} className="transition-opacity hover:opacity-60" style={{ color: CI.inkSoft }}>
-                  {l.label}
-                </a>
-              ))}
-            </nav>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <nav aria-label="頁尾連結" className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+                {navLinks.map((l) => (
+                  <a key={l.href} href={l.href} className="transition-opacity hover:opacity-60" style={{ color: CI.inkSoft }}>
+                    {l.label}
+                  </a>
+                ))}
+              </nav>
+              <a
+                href="https://www.linkedin.com/company/smartguard-tech/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="智感先鋒科技 LinkedIn 官方頁面"
+                className="flex items-center transition-opacity hover:opacity-60"
+                style={{ color: CI.inkSoft }}
+              >
+                <Linkedin size={18} strokeWidth={1.8} />
+              </a>
+            </div>
           </div>
           <div
             className="mt-10 flex flex-col gap-2 pt-6 text-xs sm:flex-row sm:justify-center"
