@@ -91,7 +91,7 @@ const cutout = getImage('prototype-cutout.png');
   .glow { position: absolute; inset: 0; background: radial-gradient(50vw 50vh at 80% 30%, rgba(79, 192, 225, 0.18), transparent 70%), radial-gradient(40vw 40vh at 90% 0%, var(--warm-glow), transparent 70%); }
   .grid { position: relative; display: grid; gap: 40px; align-items: center; }
   @media (min-width: 960px) { .grid { grid-template-columns: 1.1fr 1fr; } }
-  h1 { font-size: clamp(1.7rem, 3.3vw, 3rem); margin-top: 14px; letter-spacing: 0.02em; }
+  h1 { font-size: clamp(1.7rem, 3.3vw, 3rem); margin-top: var(--space-eyebrow); letter-spacing: 0.02em; }
   .ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 14px; }
 
   .stage { position: relative; aspect-ratio: 1; max-width: 520px; width: 100%; margin-inline: auto; display: grid; place-items: center; }
@@ -110,7 +110,7 @@ const cutout = getImage('prototype-cutout.png');
   .beam i:nth-child(3) { animation-delay: 1.6s; }
   @keyframes sg-ping { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(4); opacity: 0; } }
 
-  .gap { margin-top: clamp(40px, 5vw, 64px); }
+  .gap { margin-top: var(--space-block); }
 
   .gallery-sec { overflow: hidden; }
   .gallery { display: grid; gap: 24px; }

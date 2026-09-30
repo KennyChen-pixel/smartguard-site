@@ -46,12 +46,22 @@
   --fs-h2: clamp(1.9rem, 3.6vw, 3.1rem);
   --fs-h3: clamp(1.2rem, 1.6vw, 1.4rem);
 
+  /* 行高與垂直間距（手機較寬鬆，避免擁擠） */
+  --lh-display: 1.28;
+  --lh-heading: 1.4;
+  --space-eyebrow: 18px;   /* 眉標 → 標題 */
+  --space-lede: 24px;      /* 標題 → 導言 */
+  --space-block: clamp(40px, 5vw, 64px); /* 區塊標題 → 內容 */
+
   /* 版面 */
   --container: 1200px;
-  --gutter: clamp(16px, 4vw, 56px);
-  --section-y: clamp(72px, 10vw, 136px);
+  --gutter: clamp(20px, 4vw, 56px);
+  --section-y: clamp(96px, 11vw, 144px);
   --radius: 20px;
   --radius-sm: 12px;
   --shadow-soft: 0 18px 40px -26px rgba(12, 46, 54, 0.45);
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (min-width: 900px) {
+  :root { --lh-display: 1.14; --lh-heading: 1.3; --space-eyebrow: 16px; --space-lede: 22px; }
 }

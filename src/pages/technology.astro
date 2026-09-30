@@ -68,7 +68,7 @@ import { isTodo } from '../lib/text';
   .chart-sec { overflow: hidden; }
   .chart-sec::before { content: ""; position: absolute; inset: 0; background: radial-gradient(50vw 50vh at 50% 0%, rgba(79, 192, 225, 0.2), transparent 70%); }
   .chart-wrap { position: relative; max-width: 980px; margin-inline: auto; }
-  .flow { list-style: none; padding: 0; margin-top: 44px; display: grid; gap: 18px; counter-reset: s; }
+  .flow { list-style: none; padding: 0; margin-top: var(--space-block); display: grid; gap: 18px; counter-reset: s; }
   @media (min-width: 800px) { .flow { grid-template-columns: repeat(3, 1fr); } }
   .flow li { padding: 30px; }
   .n { font-size: 0.85rem; letter-spacing: 0.14em; color: var(--cyan-ink); }

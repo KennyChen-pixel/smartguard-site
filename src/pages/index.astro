@@ -89,7 +89,7 @@ const teamPhoto = getImage(team.photo.image);
   .tech { overflow: hidden; }
   .tech::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50vw 50vh at 100% 0%, rgba(79, 192, 225, 0.16), transparent 70%); }
   .tech .container { position: relative; }
-  .feat-wrap { margin-top: clamp(40px, 5vw, 64px); }
+  .feat-wrap { margin-top: var(--space-block); }
   .more { margin-top: 40px; }
 
   .two { display: grid; gap: clamp(40px, 6vw, 80px); align-items: center; }

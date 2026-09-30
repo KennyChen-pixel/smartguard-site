@@ -98,7 +98,7 @@ const h = home.hero;
 
   .copy { position: relative; z-index: 4; padding-top: clamp(112px, 17vh, 176px); }
   h1 {
-    font-size: var(--fs-h1); line-height: 1.08; margin-top: 18px; letter-spacing: 0.03em;
+    font-size: var(--fs-h1); line-height: var(--lh-display); margin-top: var(--space-eyebrow); letter-spacing: 0.03em;
   }
   @media (min-width: 900px) { h1 { white-space: nowrap; } }
   h1 :global(.ch) { display: inline-block; }
@@ -110,9 +110,9 @@ const h = home.hero;
     background: linear-gradient(120deg, #0d6a86 0%, #1b6f5b 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .sub { margin-top: 12px; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.25rem, 2vw, 1.75rem); color: var(--cyan-ink); letter-spacing: 0.06em; }
+  .sub { margin-top: 16px; line-height: 1.5; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.25rem, 2vw, 1.75rem); color: var(--cyan-ink); letter-spacing: 0.06em; }
   .lede { color: var(--ink-soft); }
-  .ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .ctas { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 14px; }
   .js .sub, .js .lede, .js .ctas, .js .eyebrow { opacity: 0; animation: sg-fade 0.9s var(--ease-out) forwards; }
   .js .eyebrow { animation-delay: 0.05s; }
   .js .sub { animation-delay: 0.95s; }

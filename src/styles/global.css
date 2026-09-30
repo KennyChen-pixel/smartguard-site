@@ -17,7 +17,8 @@ img, svg, canvas { display: block; max-width: 100%; }
 img { height: auto; }
 a { color: inherit; }
 button, input, select, textarea { font: inherit; color: inherit; }
-h1, h2, h3, h4 { color: var(--ink); line-height: 1.25; text-wrap: balance; }
+h1, h2, h3, h4 { color: var(--ink); line-height: var(--lh-heading); text-wrap: balance; }
+h3 { line-height: 1.5; }
 /* 大標題：中文詞組不拆開，優先在空格／標點處換行；真的放不下才強制斷行 */
 .display, .h2 { word-break: keep-all; overflow-wrap: anywhere; }
 p { text-wrap: pretty; }
@@ -69,9 +70,10 @@ strong { color: var(--ink); font-weight: 700; }
 .on-deep .eyebrow { color: var(--brand-cyan); }
 @keyframes sg-pulse { 70% { box-shadow: 0 0 0 10px rgba(102, 194, 174, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 194, 174, 0); } }
 
-.display { font-family: var(--font-display); font-weight: 900; letter-spacing: 0.02em; }
-.h2 { font-family: var(--font-display); font-weight: 900; font-size: var(--fs-h2); letter-spacing: 0.02em; margin-top: 14px; }
-.lede { font-size: clamp(1.0625rem, 1.3vw, 1.2rem); line-height: 1.9; max-width: 34em; margin-top: 18px; }
+.display { font-family: var(--font-display); font-weight: 900; letter-spacing: 0.02em; line-height: var(--lh-display); }
+.h2 { font-family: var(--font-display); font-weight: 900; font-size: var(--fs-h2); letter-spacing: 0.02em; line-height: var(--lh-heading); margin-top: var(--space-eyebrow); }
+.lede { font-size: clamp(1.0625rem, 1.3vw, 1.2rem); line-height: 1.95; max-width: 34em; margin-top: var(--space-lede); }
+p + p { margin-top: 0.9em; }
 .mono { font-family: var(--font-mono); }
 
 /* ── 按鈕 ── */
