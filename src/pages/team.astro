@@ -53,17 +53,19 @@ const photo = getImage(team.photo.image);
         })}
       </ul>
 
-      <div class="partners-wrap">
-        <SectionHead eyebrow="PARTNERS" title={team.partnersTitle} />
-        <ul class="partners">
-          {team.partners.map((p) => (
-            <li class:list={['card', { todo: isTodo(p.name) }]} data-reveal>
-              <h3>{p.name}</h3>
-              <p>{p.role}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {team.showPartners && (
+        <div class="partners-wrap">
+          <SectionHead eyebrow="PARTNERS" title={team.partnersTitle} />
+          <ul class="partners">
+            {team.partners.map((p) => (
+              <li class:list={['card', { todo: isTodo(p.name) }]} data-reveal>
+                <h3>{p.name}</h3>
+                <p>{p.role}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   </section>
 

@@ -9,7 +9,7 @@ import faq from '../../content/faq.json';
 import contact from '../../content/contact.json';
 
 // 元件中寫死、會用到標題字體的文字
-const STATIC = '常見問題找不到這個頁面團隊成員合作夥伴「」，、。';
+const STATIC = '常見問題找不到這個頁面團隊成員「」，、。';
 const ASCII = ' !%&()+,-./0123456789:?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz≠';
 
 // 會以標題字體顯示的欄位名稱（內文段落用系統字體，不需收集）

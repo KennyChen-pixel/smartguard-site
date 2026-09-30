@@ -41,6 +41,8 @@
       "_待補": "TODO：個人照片（放入 src/assets/images/ 後填入檔名，建議直式 4:5）"
     }
   ],
+  "showPartners": false,
+  "_showPartners說明": "合作夥伴區塊開關：設為 true 才會顯示（補齊下方 TODO 後再開啟）。",
   "partnersTitle": "合作夥伴",
   "partners": [
     { "name": "TODO：合作單位名稱", "role": "TODO：合作內容" }
