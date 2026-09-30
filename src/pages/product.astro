@@ -11,8 +11,15 @@ import home from '../../content/home.json';
 import { getImage } from '../lib/images';
 import { isTodo } from '../lib/text';
 const cutout = getImage('prototype-cutout.png');
+// 常見問題：附加句只有 show 為 true 才公開；含 TODO 的題目不寫入結構化資料
+type FaqItem = { q: string; a: string; extra?: { text: string; show: boolean } };
+const faqItems = (faq.items as FaqItem[]).map((f) => ({
+  q: f.q,
+  a: f.extra?.show ? `${f.a}${f.extra.text}` : f.a,
+}));
+const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
 ---
-<BaseLayout title={product.seo.title} description={product.seo.description} product>
+<BaseLayout title={product.seo.title} description={product.seo.description} product faq={faqLd}>
   <section class="p-hero paper-grid">
     <div class="glow" aria-hidden="true"></div>
     <div class="container grid">
@@ -64,7 +71,7 @@ const cutout = getImage('prototype-cutout.png');
       </div>
       <div>
         <div class="faq" data-reveal>
-          {faq.items.map((f) => (
+          {faqItems.map((f) => (
             <details class:list={['card', { todo: isTodo(f.q) || isTodo(f.a) }]}>
               <summary><span>{f.q}</span><Icon name="Plus" size={20} /></summary>
               <p>{f.a}</p>
@@ -121,7 +128,7 @@ const cutout = getImage('prototype-cutout.png');
   }
   .faq { display: grid; gap: 12px; }
   details { padding: 0 22px; }
-  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 64px; cursor: pointer; font-weight: 700; color: var(--ink); }
+  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 64px; padding-block: 16px; line-height: 1.6; cursor: pointer; font-weight: 700; color: var(--ink); }
   summary::-webkit-details-marker { display: none; }
   summary :global(.icon) { flex: none; color: var(--cyan-ink); transition: transform 0.3s var(--ease-out); }
   details[open] summary :global(.icon) { transform: rotate(45deg); }

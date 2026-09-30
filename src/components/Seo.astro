@@ -7,8 +7,20 @@ interface Props {
   image?: string;
   product?: boolean;
   noindex?: boolean;
+  faq?: { q: string; a: string }[];
 }
-const { title, description, image = '/og.png', product = false, noindex = false } = Astro.props;
+const { title, description, image = '/og.png', product = false, noindex = false, faq = [] } = Astro.props;
+const faqLd = faq.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : null;
 const canonical = new URL(Astro.url.pathname === '/index' ? '/' : Astro.url.pathname, site.url).href;
 const ogImage = new URL(image, site.url).href;
 
@@ -62,3 +74,4 @@ const productLd = {
 
 <script type="application/ld+json" set:html={JSON.stringify(organization)} />
 {product && <script type="application/ld+json" set:html={JSON.stringify(productLd)} />}
+{faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
