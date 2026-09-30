@@ -1,5 +1,5 @@
 {
-  "_說明": "產品頁內容。features 為產品特點卡片（icon 可用：Radio、Shield、Cpu、Award、Eye、HeartHandshake、Medal、FileBadge）；specs 為規格表；image 欄位填 src/assets/images/ 裡的檔名。",
+  "_說明": "產品頁內容。features 為產品特點卡片（icon 可用：Radio、Shield、Cpu、Award、Eye、HeartHandshake、Medal、FileBadge）；image 欄位填 src/assets/images/ 裡的檔名。",
   "seo": {
     "title": "產品｜SmartGuard 智慧主動式防跌偵測系統",
     "description": "SmartGuard 智慧主動式防跌偵測系統：專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險。"
@@ -46,12 +46,5 @@
       "tag": "DESIGN",
       "caption": "量產外觀設計方向"
     }
-  ],
-  "specs": [
-    { "label": "TODO：規格項目（例如：重量）", "value": "TODO" },
-    { "label": "TODO：規格項目（例如：感測方式）", "value": "TODO" },
-    { "label": "TODO：規格項目（例如：預警方式）", "value": "TODO" },
-    { "label": "TODO：規格項目（例如：續航時間）", "value": "TODO" },
-    { "label": "TODO：規格項目（例如：配戴方式）", "value": "TODO" }
   ]
 }

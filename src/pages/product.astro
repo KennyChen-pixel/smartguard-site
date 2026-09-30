@@ -58,19 +58,11 @@ const cutout = getImage('prototype-cutout.png');
   </section>
 
   <section class="section paper-grid">
-    <div class="container two">
-      <div>
-        <SectionHead eyebrow="SPECIFICATIONS" title="產品規格" />
-        <dl class="specs card" data-reveal>
-          {product.specs.map((s) => (
-            <div class:list={['row', { todo: isTodo(s.label) || isTodo(s.value) }]}>
-              <dt>{s.label}</dt><dd>{s.value}</dd>
-            </div>
-          ))}
-        </dl>
+    <div class="container two faq-wrap">
+      <div class="faq-head">
+        <SectionHead eyebrow="FAQ" title={faq.title} />
       </div>
       <div>
-        <SectionHead eyebrow="FAQ" title={faq.title} />
         <div class="faq" data-reveal>
           {faq.items.map((f) => (
             <details class:list={['card', { todo: isTodo(f.q) || isTodo(f.a) }]}>
@@ -122,14 +114,12 @@ const cutout = getImage('prototype-cutout.png');
   figcaption { margin-top: 14px; color: var(--on-deep); font-weight: 500; }
   .tag { margin-right: 12px; font-size: 0.75rem; letter-spacing: 0.14em; color: var(--brand-cyan); }
 
-  .two { display: grid; gap: 56px; }
-  @media (min-width: 960px) { .two { grid-template-columns: 1fr 1fr; } }
-  .specs { margin-top: 32px; padding: 8px 24px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-  .row:last-child { border-bottom: 0; }
-  dt { color: var(--ink-soft); }
-  dd { color: var(--ink); font-weight: 700; margin: 0; }
-  .faq { margin-top: 32px; display: grid; gap: 12px; }
+  .two { display: grid; gap: 40px; }
+  @media (min-width: 960px) {
+    .faq-wrap { grid-template-columns: 0.8fr 1.4fr; gap: 72px; align-items: start; }
+    .faq-head { position: sticky; top: 112px; }
+  }
+  .faq { display: grid; gap: 12px; }
   details { padding: 0 22px; }
   summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 64px; cursor: pointer; font-weight: 700; color: var(--ink); }
   summary::-webkit-details-marker { display: none; }

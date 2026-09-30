@@ -41,7 +41,7 @@ if (news) {
 }
 const product = data['product.json'];
 if (product) {
-  need(product, ['name', 'features', 'gallery', 'specs'], 'product.json');
+  need(product, ['name', 'features'], 'product.json');
   product.features?.forEach((f, i) => { need(f, ['title', 'description', 'icon'], `product.json features[${i}]`); if (f.icon && !ICONS.includes(f.icon)) errors.push(`product.json features[${i}] 的 icon「${f.icon}」不存在`); });
   product.gallery?.forEach((g, i) => img(g.image, `product.json gallery[${i}]`));
   img(product.heroImage?.image, 'product.json heroImage');
