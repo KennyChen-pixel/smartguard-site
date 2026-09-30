@@ -4,6 +4,17 @@ node_modules/
 # 建置輸出（部署平台會自己跑 build）
 dist/
 
+# 環境變數與金鑰（絕不可進 git）
+.env
+.env.*
+!.env.example
+
+# Vercel 本機連結設定
+.vercel
+
+# Claude Code 本機設定（含個人路徑與權限）
+.claude/settings.local.json
+
 # 系統與編輯器暫存
 .DS_Store
 Thumbs.db
