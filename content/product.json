@@ -1,5 +1,5 @@
 {
-  "_說明": "產品頁內容。features 為產品特點卡片（icon 可用：Radio、Shield、Cpu、Award、Eye、HeartHandshake、Medal、FileBadge）；image 欄位填 src/assets/images/ 裡的檔名。",
+  "_說明": "產品頁內容。heroImage 為產品頁主圖；features 為產品特點卡片（icon 可用：Radio、Shield、Cpu、Award、Eye、HeartHandshake、Medal、FileBadge）；image 欄位填 src/assets/images/ 裡的檔名。",
   "seo": {
     "title": "產品｜SmartGuard 智慧主動式防跌偵測系統",
     "description": "SmartGuard 智慧主動式防跌偵測系統：專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險。"
@@ -8,8 +8,8 @@
   "eyebrow": "PRODUCT",
   "lede": "專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險，在跌倒發生「之前」就築起防線。",
   "heroImage": {
-    "image": "product-render-2.png",
-    "alt": "SmartGuard 穿戴式防跌裝置產品示意圖：拖鞋鞋面搭載距離感測模組"
+    "image": "prototype-cutout.png",
+    "alt": "SmartGuard 防跌裝置實測原型：距離感測模組安裝於藍色拖鞋鞋面"
   },
   "features": [
     {
@@ -31,20 +31,6 @@
       "title": "AI 智慧分析",
       "description": "即時分析步態數據，持續優化偵測準確率，讓防護系統越用越聰明。",
       "icon": "Cpu"
-    }
-  ],
-  "gallery": [
-    {
-      "image": "prototype-cutout.png",
-      "alt": "SmartGuard 防跌裝置實測原型：距離感測模組安裝於藍色拖鞋鞋面",
-      "tag": "PROTOTYPE",
-      "caption": "產品實測原型"
-    },
-    {
-      "image": "product-render-1.png",
-      "alt": "SmartGuard 量產外觀設計示意圖：感測器內嵌於鞋面的一體化設計",
-      "tag": "DESIGN",
-      "caption": "量產外觀設計方向"
     }
   ]
 }

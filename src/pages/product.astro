@@ -10,7 +10,7 @@ import faq from '../../content/faq.json';
 import home from '../../content/home.json';
 import { getImage } from '../lib/images';
 import { isTodo } from '../lib/text';
-const cutout = getImage('prototype-cutout.png');
+const cutout = getImage(product.heroImage.image);
 // 常見問題：附加句只有 show 為 true 才公開；含 TODO 的題目不寫入結構化資料
 type FaqItem = { q: string; a: string; extra?: { text: string; show: boolean } };
 const faqItems = (faq.items as FaqItem[]).map((f) => ({
@@ -36,31 +36,16 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
         <div class="orbit o1" aria-hidden="true"></div>
         <div class="orbit o2" aria-hidden="true"></div>
         <div class="scan" aria-hidden="true"></div>
-        <Image class="device" src={cutout} alt={product.gallery[0].alt} widths={[320, 480, 640]} sizes="(max-width: 900px) 70vw, 420px" loading="eager" fetchpriority="high" />
+        <Image class="device" src={cutout} alt={product.heroImage.alt} widths={[320, 480, 640]} sizes="(max-width: 900px) 70vw, 420px" loading="eager" fetchpriority="high" />
         <div class="beam" aria-hidden="true"><i></i><i></i><i></i></div>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section on-deep features-sec">
     <div class="container">
       <SectionHead eyebrow={home.techIntro.eyebrow} title={home.techIntro.title} body={home.techIntro.body} />
-      <div class="gap"><FeatureGrid items={product.features} /></div>
-    </div>
-  </section>
-
-  <section class="section on-deep gallery-sec">
-    <div class="container">
-      <div class="gallery">
-        {product.gallery.map((g, i) => (
-          <figure data-reveal style={`--d:${i * 0.12}s`}>
-            <div class="frame">
-              <Image src={getImage(g.image)} alt={g.alt} widths={[400, 640, 900]} sizes="(max-width: 760px) 92vw, 45vw" />
-            </div>
-            <figcaption><span class="mono tag">{g.tag}</span>{g.caption}</figcaption>
-          </figure>
-        ))}
-      </div>
+      <div class="gap"><FeatureGrid items={product.features} tone="deep" /></div>
     </div>
   </section>
 
@@ -111,15 +96,9 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
 
   .gap { margin-top: var(--space-block); }
 
-  .gallery-sec { overflow: hidden; }
-  .gallery { display: grid; gap: 24px; }
-  @media (min-width: 760px) { .gallery { grid-template-columns: 1fr 1fr; } }
-  .frame { position: relative; border-radius: var(--radius); overflow: hidden; background: #f4f4f4; aspect-ratio: 4 / 3; }
-  .frame :global(img) { position: absolute; inset: 6%; width: 88%; height: 88%; object-fit: contain; mix-blend-mode: multiply; transition: transform 0.8s var(--ease-out);
-    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%); }
-  figure:hover .frame :global(img) { transform: scale(1.04); }
-  figcaption { margin-top: 14px; color: var(--on-deep); font-weight: 500; }
-  .tag { margin-right: 12px; font-size: 0.75rem; letter-spacing: 0.14em; color: var(--brand-cyan); }
+  .features-sec { overflow: hidden; }
+  .features-sec::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50vw 50vh at 100% 0%, rgba(79, 192, 225, 0.16), transparent 70%); }
+  .features-sec .container { position: relative; }
 
   .two { display: grid; gap: 40px; }
   @media (min-width: 960px) {
