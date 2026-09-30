@@ -6,7 +6,9 @@ const { eyebrow, title, body } = Astro.props;
 <section class="page-head paper-grid">
   <div class="glow" aria-hidden="true"></div>
   <svg class="trace" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 80 L180 80 L196 44 L208 96 L220 80 L420 80 L436 50 L448 94 L460 80 L660 80 L676 40 L688 98 L700 80 L900 80 L916 52 L928 92 L940 80 L1200 80" />
+    <path class="base" d="M0 80 L180 80 L196 44 L208 96 L220 80 L420 80 L436 50 L448 94 L460 80 L660 80 L676 40 L688 98 L700 80 L900 80 L916 52 L928 92 L940 80 L1200 80" />
+    <!-- 沿訊號線前進的發光線段 -->
+    <path class="pulse" pathLength="1000" d="M0 80 L180 80 L196 44 L208 96 L220 80 L420 80 L436 50 L448 94 L460 80 L660 80 L676 40 L688 98 L700 80 L900 80 L916 52 L928 92 L940 80 L1200 80" />
   </svg>
   <div class="container inner">
     <p class="eyebrow">{eyebrow}</p>
@@ -21,6 +23,14 @@ const { eyebrow, title, body } = Astro.props;
   .inner { position: relative; }
   h1 { font-size: clamp(2.2rem, 5vw, 4.2rem); margin-top: var(--space-eyebrow); letter-spacing: 0.03em; }
   .trace { position: absolute; left: 0; right: 0; bottom: 8px; width: 100%; height: 56px; opacity: 0.55; }
-  .trace path { fill: none; stroke: var(--brand-cyan); stroke-width: 1.6; stroke-dasharray: 2600; stroke-dashoffset: 2600; animation: sg-draw 2.6s var(--ease-out) 0.2s forwards; vector-effect: non-scaling-stroke; }
+  .trace .base { fill: none; stroke: var(--brand-cyan); stroke-width: 1.6; stroke-dasharray: 2600; stroke-dashoffset: 2600; animation: sg-draw 2.6s var(--ease-out) 0.2s forwards; vector-effect: non-scaling-stroke; }
   @keyframes sg-draw { to { stroke-dashoffset: 0; } }
+  .pulse {
+    fill: none; stroke: var(--brand-mint); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke;
+    stroke-dasharray: 26 1000; stroke-dashoffset: 26; opacity: 0;
+    filter: drop-shadow(0 0 4px rgba(79, 192, 225, 0.9));
+    animation: sg-run 6s linear 2.6s infinite;
+  }
+  @keyframes sg-run { 0% { stroke-dashoffset: 26; opacity: 1; } 96% { opacity: 1; } 100% { stroke-dashoffset: -1000; opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .pulse { display: none; } }
 </style>

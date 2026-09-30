@@ -105,6 +105,7 @@ p + p { margin-top: 0.9em; }
   isolation: isolate;
 }
 .btn .icon { width: 18px; height: 18px; transition: transform 0.25s var(--ease-out); }
+@media (max-width: 420px) { .btn { padding: 0 20px; font-size: 0.97rem; } }
 .btn:hover .icon { transform: translateX(3px); }
 .btn-primary { background: var(--deep); color: #fff; }
 .btn-primary::before {
