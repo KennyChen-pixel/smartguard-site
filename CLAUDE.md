@@ -34,10 +34,20 @@ npm run preview      # 預覽建置結果
 |---|---|---|
 | 公司名稱、Email、電話、地址、LinkedIn、導覽列 | `content/site.json` | 全站共用（頁首、頁尾、聯絡頁、結構化資料） |
 | 首頁主標題、副標、按鈕、信任數據列、首頁各區導讀、底部 CTA | `content/home.json` | `hero`、`trust`、`techIntro`、`cta` |
-| 產品特點、產品圖、規格表 | `content/product.json` | `features`、`gallery`、`specs` |
-| 常見問題 | `content/faq.json` | 顯示在產品頁 |
-| 技術原理、「距離感測 ≠ 傳統 IMU」、運作流程 | `content/technology.json` | |
-| 關於我們、團隊照片、成員、合作夥伴 | `content/team.json` | |
+| 產品頁主圖、產品特點 | `content/product.json` | `heroImage`、`features`（規格表與產品圖庫已依負責人要求移除） |
+| 常見問題 | `content/faq.json` | 顯示在產品頁，並自動輸出 FAQPage 結構化資料 |
+| 技術原理、「距離感測 ≠ 傳統 IMU」、運作流程 | `content/technology.json` | 運作流程目前隱藏：`flow.show: false` |
+| 關於我們、團隊照片、成員、合作夥伴 | `content/team.json` | 合作夥伴目前隱藏：`showPartners: false` |
+
+### 顯示開關（隱藏但保留內容）
+
+| 區塊 | 開關 | 目前 |
+|---|---|---|
+| 技術頁「HOW IT WORKS」運作流程 | `technology.json` → `flow.show` | `false`（內容仍是 TODO） |
+| 團隊頁合作夥伴 | `team.json` → `showPartners` | `false`（內容仍是 TODO） |
+| FAQ 附加句（例：視障者使用情境） | `faq.json` → 該題 `extra.show` | `false`（未驗證，不可公開） |
+
+開關設為 `false` 時，該區塊不會出現在網頁原始碼、也不會寫入結構化資料。以 `_` 開頭的欄位（如 `_待確認`、`_待補`）是內部備註，不會顯示。
 | 最新消息與榮譽 | `content/news.json` | 首頁自動顯示最上面 3 則 |
 | 聯絡頁文字、表單需求類別 | `content/contact.json` | |
 | 各頁 `<title>` 與 description | 各檔案的 `seo` 欄位 | title ≤ 60 字、description ≤ 160 字 |
@@ -52,6 +62,8 @@ npm run preview      # 預覽建置結果
 
 - `icon` 只能用：`Radio`（展會/活動）、`Award`（獲獎/入選）、`FileBadge`（專利/認證）、`Medal`（獎牌）
 - 沒有連結時 `url` 填 `""`
+
+**團隊成員**：`content/team.json` → `members`，每位 `{ name, role, bio, photo }`。`bio` 開頭的【分類】會自動變成小標籤。照片放 `src/assets/images/`（直式 4:5、檔名如 `team-姓名拼音.jpg`），沒有照片時 `photo` 留空，會顯示姓氏字首。
 
 **新增產品特點**：`content/product.json` → `features` 加一筆 `{ "title", "description", "icon" }`（icon 另可用 `Shield`、`Cpu`、`Eye`、`HeartHandshake`）。
 
@@ -82,7 +94,7 @@ npm run preview      # 預覽建置結果
 
 - `src/styles/tokens.css`、`src/styles/global.css`（色彩、字體、間距；文字色皆通過 WCAG AA）
 - `src/layouts/BaseLayout.astro`、`src/components/Seo.astro`（SEO、結構化資料）
-- `src/components/Hero.astro`、`src/scripts/hero-scene.ts`（首頁主視覺動畫）
+- `src/components/Hero.astro`、`src/scripts/hero-scene.ts`（首頁主視覺：聲波感測動畫與心電圖）
 - `src/components/Header.astro`、`Footer.astro`、`Icon.astro`
 - `astro.config.mjs`、`vercel.json`
 - `legacy/`：舊版 React 網站備份，不參與建置
