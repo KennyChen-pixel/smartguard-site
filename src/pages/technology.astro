@@ -32,7 +32,7 @@ import { isTodo } from '../lib/text';
     </div>
   </section>
 
-  <section class="section on-deep chart-sec">
+  <section class="section paper-grid chart-sec">
     <div class="container">
       <div class="chart-wrap" data-reveal>
         <SignalChart />
@@ -40,6 +40,7 @@ import { isTodo } from '../lib/text';
     </div>
   </section>
 
+  {tech.flow.show && (
   <section class="section paper-grid">
     <div class="container">
       <SectionHead eyebrow={tech.flow.eyebrow} title={tech.flow.title} />
@@ -54,6 +55,7 @@ import { isTodo } from '../lib/text';
       </ol>
     </div>
   </section>
+  )}
 
   <CtaBand />
 </BaseLayout>
@@ -66,7 +68,7 @@ import { isTodo } from '../lib/text';
   .points li { display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: start; color: var(--ink); font-size: 1.05rem; }
   .pi { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(79, 192, 225, 0.14), rgba(102, 194, 174, 0.14)); border: 1px solid rgba(79, 192, 225, 0.4); color: var(--cyan-ink); }
   .chart-sec { overflow: hidden; }
-  .chart-sec::before { content: ""; position: absolute; inset: 0; background: radial-gradient(50vw 50vh at 50% 0%, rgba(79, 192, 225, 0.2), transparent 70%); }
+  .chart-sec::before { content: ""; position: absolute; inset: 0; background: radial-gradient(50vw 50vh at 50% 0%, rgba(79, 192, 225, 0.12), transparent 70%); }
   .chart-wrap { position: relative; max-width: 980px; margin-inline: auto; }
   .flow { list-style: none; padding: 0; margin-top: var(--space-block); display: grid; gap: 18px; counter-reset: s; }
   @media (min-width: 800px) { .flow { grid-template-columns: repeat(3, 1fr); } }

@@ -17,6 +17,8 @@
     ]
   },
   "flow": {
+    "show": false,
+    "_說明": "運作流程區塊。show 設為 true 才會顯示（補齊下方 TODO 後再開啟）。",
     "eyebrow": "HOW IT WORKS",
     "title": "TODO：運作流程標題",
     "steps": [

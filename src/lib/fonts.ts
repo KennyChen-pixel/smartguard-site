@@ -23,7 +23,7 @@ function collect(v: unknown, out: string[], key = '') {
 
 export function displayFontUrl(): string {
   const strings: string[] = [STATIC, ASCII];
-  collect([site, home, product, technology, team, contact], strings);
+  collect([site, home, product, { ...technology, flow: technology.flow.show ? technology.flow : {} }, team, contact], strings);
   strings.push(faq.title, ...team.members.map((m) => m.name.replace('TODO：', '').slice(0, 1)));
   const chars = [...new Set(strings.join(''))].filter((c) => c.trim() && !/[\u0000-\u001f]/.test(c)).sort().join('');
   return `https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&display=swap&text=${encodeURIComponent(chars)}`;
