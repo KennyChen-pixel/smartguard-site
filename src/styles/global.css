@@ -111,12 +111,14 @@ a.card:hover, .card.lift:hover { transform: translateY(-4px); box-shadow: var(--
 /* TODO 占位：補內容前醒目顯示 */
 .todo { outline: 2px dashed var(--alert); outline-offset: 2px; background: rgba(224, 138, 30, 0.08); border-radius: 6px; }
 
-/* ── 捲動進場 ── */
-.js [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); transition-delay: var(--d, 0s); }
-.js [data-reveal].is-in { opacity: 1; transform: none; }
+/* ── 捲動進場 ──
+   只有載入時位於畫面外的元素會被標記 .reveal-pending（首屏內容直接顯示，不影響載入速度） */
+[data-reveal].reveal-pending { opacity: 0; transform: translateY(28px); }
+[data-reveal].reveal-ready { transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); transition-delay: var(--d, 0s); }
+[data-reveal].reveal-ready.is-in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-  .js [data-reveal] { opacity: 1; transform: none; }
+  [data-reveal].reveal-pending { opacity: 1; transform: none; }
 }

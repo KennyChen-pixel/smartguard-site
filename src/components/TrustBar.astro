@@ -31,7 +31,7 @@ import home from '../../content/home.json';
 </style>
 <script>
   // 百分比數字進場時由 0 開始計數
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
   document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
     if (reduce) return;
     const target = parseInt(el.dataset.count!, 10);

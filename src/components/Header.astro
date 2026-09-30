@@ -12,7 +12,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
 <header class:list={['site-header', { overlay }]} data-header>
   <div class="bar container">
     <a class="brand" href="/" aria-label={`${site.name} 首頁`}>
-      <Image src={logo} alt="" width={36} height={41} loading="eager" />
+      <Image src={logo} alt="" width={36} height={41} densities={[1, 2, 3]} loading="eager" />
       <span>{site.name}<small>SMARTGUARD TECH</small></span>
     </a>
     <nav class="desktop" aria-label="主要導覽">

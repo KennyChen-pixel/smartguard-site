@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { displayFontUrl, MONO_FONT_URL } from '../lib/fonts';
 
 interface Props {
   title: string;
@@ -12,8 +13,7 @@ interface Props {
   headerOverlay?: boolean;
 }
 const { title, description, product, noindex, headerOverlay = false } = Astro.props;
-const fonts =
-  'https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap';
+const displayFont = displayFontUrl();
 ---
 <!doctype html>
 <html lang="zh-Hant">
@@ -26,12 +26,12 @@ const fonts =
     <link rel="sitemap" href="/sitemap-index.xml" />
     <Seo title={title} description={description} product={product} noindex={noindex} />
 
-    <!-- 字體：非阻塞載入；中文字體由 Google Fonts 依字元切片，只下載用到的部分 -->
+    <!-- 字體：內文用系統中文字體；標題字體只載入網站用到的字（建置時自動計算），皆非阻塞 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href={fonts} />
-    <link rel="stylesheet" href={fonts} media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href={fonts} /></noscript>
+    <link rel="stylesheet" href={displayFont} media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href={MONO_FONT_URL} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={displayFont} /><link rel="stylesheet" href={MONO_FONT_URL} /></noscript>
 
     <script is:inline>document.documentElement.classList.add('js');</script>
     <slot name="head" />
@@ -44,19 +44,34 @@ const fonts =
     </main>
     <Footer />
     <script>
-      // 捲動進場：元素進入畫面時加上 .is-in
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (e.isIntersecting) {
-              e.target.classList.add('is-in');
-              io.unobserve(e.target);
+      // 捲動進場：只處理載入時在畫面下方的元素；進入畫面時加上 .is-in
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
+      if (!reduce) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-in');
+                io.unobserve(e.target);
+              }
             }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        const pending: Element[] = [];
+        document.querySelectorAll('[data-reveal]').forEach((el) => {
+          if (el.getBoundingClientRect().top > innerHeight) {
+            el.classList.add('reveal-pending');
+            pending.push(el);
           }
-        },
-        { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
-      );
-      document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+        });
+        requestAnimationFrame(() => {
+          pending.forEach((el) => {
+            el.classList.add('reveal-ready');
+            io.observe(el);
+          });
+        });
+      }
     </script>
   </body>
 </html>

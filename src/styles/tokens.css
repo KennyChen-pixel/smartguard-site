@@ -34,7 +34,8 @@
 
   /* 字體 */
   --font-display: 'Noto Serif TC', 'Songti TC', 'PMingLiU', serif;
-  --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  /* 內文：系統中文字體（iOS/macOS 蘋方、Android Noto Sans CJK、Windows 微軟正黑體），零下載 */
+  --font-sans: system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', 'Heiti TC', sans-serif;
   --font-mono: 'Azeret Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* 字級（長輩友善：內文 17px 起） */

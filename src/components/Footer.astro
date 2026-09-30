@@ -9,7 +9,7 @@ const year = new Date().getFullYear();
   <div class="container grid">
     <div class="brand-col">
       <a class="brand" href="/" aria-label={`${site.name} 首頁`}>
-        <Image src={logo} alt="" width={40} height={46} />
+        <Image src={logo} alt="" width={40} height={46} densities={[1, 2, 3]} />
         <span>{site.name}<small>{site.nameEn}</small></span>
       </a>
       <p class="line">{site.brandLine}</p>
