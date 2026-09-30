@@ -387,10 +387,15 @@ export function initHeroScene(root: HTMLElement) {
   const kick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); };
   addEventListener('resize', () => { resize(); kick(); });
   if (!still) {
+    // 游標視差 ＋ 捲動景深：往下捲時地面緩緩後退（地平線上移）
+    let pointerY = 0;
+    const updateCamY = () => { camT.y = pointerY - Math.min(scrollY, H) * 0.12; };
     addEventListener('pointermove', (e) => {
       camT.x = (e.clientX / innerWidth - 0.5) * -0.5;
-      camT.y = (e.clientY / innerHeight - 0.5) * -16;
+      pointerY = (e.clientY / innerHeight - 0.5) * -16;
+      updateCamY();
     }, { passive: true });
+    addEventListener('scroll', updateCamY, { passive: true });
     new IntersectionObserver(([e]) => { running = e.isIntersecting; if (running) kick(); }).observe(root);
     document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) kick(); });
   }
