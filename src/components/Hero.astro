@@ -34,7 +34,6 @@ const h = home.hero;
   <div class="hud" data-hud aria-hidden="true">
     <div class="card">
       <p class="t"><i></i><span data-hud-title>偵測到前方障礙物</span></p>
-      <p class="d"><span class="k">距離</span><span data-hud-dist>2.0 m</span></p>
     </div>
     <span class="stem"></span>
   </div>
@@ -125,14 +124,12 @@ const h = home.hero;
   .hud.on { opacity: 1; }
   .hud .card {
     background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 16px; padding: 12px 18px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 16px; padding: 12px 18px;
     box-shadow: 0 18px 36px -20px rgba(12, 46, 54, 0.55), 0 0 0 1px rgba(12, 46, 54, 0.05); white-space: nowrap;
   }
   .hud .t { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 0.98rem; color: var(--ink); line-height: 1.4; }
   .hud .t i { width: 10px; height: 10px; border-radius: 50%; background: var(--alert); box-shadow: 0 0 0 4px rgba(224, 138, 30, 0.2); transition: background 0.4s, box-shadow 0.4s; }
   .hud.safe .t i { background: var(--brand-mint); box-shadow: 0 0 0 4px rgba(102, 194, 174, 0.25); }
-  .hud .d { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; font-family: var(--font-mono); font-size: 1.35rem; font-weight: 500; color: var(--ink); line-height: 1.4; font-variant-numeric: tabular-nums; }
-  .hud .d .k { font-family: var(--font-sans); font-size: 0.8rem; color: var(--ink-soft); }
   .hud .stem { display: block; width: 2px; height: 26px; margin: 0 auto; background: linear-gradient(var(--ink-soft), transparent); opacity: 0.6; }
 
   /* 步態訊號條 */
@@ -154,8 +151,7 @@ const h = home.hero;
     .veil { background: linear-gradient(180deg, rgba(244, 248, 247, 0.9) 0%, rgba(244, 248, 247, 0.75) 48%, rgba(244, 248, 247, 0) 62%); }
     .strip { grid-template-columns: 1fr; height: 76px; }
     .strip .lbl { display: none; }
-    .hud .d { font-size: 1.1rem; }
-    .hud .card { padding: 10px 14px 8px; }
+    .hud .card { padding: 10px 14px; }
   }
 </style>
 

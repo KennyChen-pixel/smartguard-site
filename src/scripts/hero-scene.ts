@@ -1,5 +1,5 @@
 /* ============================================================
-   首頁主視覺：長輩行走 → 雷射測距鎖定前方門檻 → 震動預警 → 放慢 → 安全
+   首頁主視覺：長輩行走 → 感測波向前擴散、碰到門檻產生回波 → 震動預警 → 放慢 → 安全
    以 Canvas 2D 繪製 3D 透視地面。尊重 prefers-reduced-motion，畫面外自動暫停。
    網址加 ?t=毫秒 可凍結在指定時間點（截圖用）。
    ============================================================ */
@@ -13,7 +13,6 @@ export function initHeroScene(root: HTMLElement) {
   const vib = root.querySelector<HTMLElement>('[data-vib]')!;
   const hud = root.querySelector<HTMLElement>('[data-hud]')!;
   const hudTitle = hud.querySelector<HTMLElement>('[data-hud-title]')!;
-  const hudDist = hud.querySelector<HTMLElement>('[data-hud-dist]')!;
   const gc = root.querySelector<HTMLCanvasElement>('[data-gait]')!;
   const gx = gc.getContext('2d')!;
 
@@ -22,12 +21,11 @@ export function initHeroScene(root: HTMLElement) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const still = frozen || reduce;
 
-  // ── 世界設定（單位：任意長度；顯示距離 = 世界距離 / M_PER）──
+  // ── 世界設定（單位：任意長度）──
   const S: V2 = { x: 0, z: 2.2 };                       // 感測器位置
   const FWD: V2 = { x: Math.SQRT1_2, z: Math.SQRT1_2 };  // 行走方向
   const SIDE: V2 = { x: FWD.z, z: -FWD.x };
   const CAM_H = 1.0;
-  const M_PER = 2.6;
   const DU0 = 10.5, DET = 5.2, V1 = 1.9, V2 = 0.4, TAU = 0.35;
   const T_DET = (DU0 - DET) / V1;          // 秒
   const SAFE_AFTER = 1.6;
@@ -41,9 +39,11 @@ export function initHeroScene(root: HTMLElement) {
     t < T_DET ? V1 * t : V1 * T_DET + V2 * (t - T_DET) + (V1 - V2) * TAU * (1 - Math.exp(-(t - T_DET) / TAU));
 
   function resize() {
-    DPR = Math.min(devicePixelRatio || 1, 2);
     W = cv.clientWidth; H = cv.clientHeight;
     const narrow = W < 820;
+    // 手機：降低繪圖解析度與點陣密度，確保流暢
+    DPR = Math.min(devicePixelRatio || 1, narrow ? 1.5 : 2);
+    GRID = narrow ? 0.56 : 0.42;
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     F = H * (narrow ? 0.55 : 0.9);
@@ -61,30 +61,55 @@ export function initHeroScene(root: HTMLElement) {
   });
   const along = (d: number, side = 0) => ({ x: S.x + FWD.x * d + SIDE.x * side, z: S.z + FWD.z * d + SIDE.z * side });
 
-  // ── 地面點陣 ──
-  const GRID = 0.42;
-  function drawFloor(s: number, du: number, t: number, detected: boolean) {
+  // ── 聲波：由感測器向前方扇形擴散，碰到障礙物產生回波 ──
+  const EMIT = 0.5;          // 每 0.5 秒發出一道波
+  const C = 2.4;             // 波速（世界單位／秒）：波紋間距約 1.2，畫面上同時可見 3～4 道
+  const HALF = 0.32;         // 地面照射扇形半角（弧度）
+  const RMAX = DET + 0.3;    // 無障礙時的最大傳播距離
+  type Wave = { r: number; fade: number; echo: number; echoFade: number };
+
+  function wavesAt(t: number, du: number): Wave[] {
+    const hitD = du - BOX.depth;
+    const inRange = hitD <= DET;
+    const out: Wave[] = [];
+    const k1 = Math.floor(t / EMIT), k0 = Math.max(0, k1 - 10);
+    for (let k = k0; k <= k1; k++) {
+      const r = (t - k * EMIT) * C;
+      if (inRange) {
+        if (r < hitD) out.push({ r, fade: Math.pow(1 - r / (hitD * 1.15), 1.1), echo: -1, echoFade: 0 });
+        else if (r < hitD * 2) out.push({ r: -1, fade: 0, echo: r - hitD, echoFade: Math.pow(1 - (r - hitD) / hitD, 1.2) });
+      } else if (r < RMAX) {
+        out.push({ r, fade: Math.pow(1 - r / RMAX, 1.3), echo: -1, echoFade: 0 });
+      }
+    }
+    return out;
+  }
+
+  // ── 地面點陣（被波前照亮）──
+  let GRID = 0.42;
+  const COS_CONE = Math.cos(HALF + 0.12);
+  function drawFloor(s: number, waves: Wave[]) {
     const ox = ((-(FWD.x * s)) % GRID + GRID) % GRID;
     const oz = ((-(FWD.z * s)) % GRID + GRID) % GRID;
-    const beamLen = detected ? du - BOX.depth : DET;
+    const fronts = waves.filter((w) => w.r > 0);
     for (let z = 1.1 + oz; z < 19; z += GRID) {
       const depth = Math.max(0, 1 - (z - 1.1) / 17);
       for (let x = -12 + ox; x < 26; x += GRID) {
         const q = P(x, 0, z);
         if (q.y > H + 4 || q.x < -8 || q.x > W + 8) continue;
-        // 雷射照射範圍：前方窄扇形
-        const dx = x - S.x, dz = z - S.z;
-        const a = dx * FWD.x + dz * FWD.z;          // 沿行進方向距離
-        const b = Math.abs(dx * SIDE.x + dz * SIDE.z); // 側向距離
         let lit = 0;
-        if (a > 0 && a < beamLen) {
-          const spread = 0.12 + a * 0.2;
-          lit = Math.max(0, 1 - b / spread) * (0.55 + 0.45 * Math.sin(a * 3 - t * 9) ** 2);
+        if (fronts.length) {
+          const dx = x - S.x, dz = z - S.z, d = Math.hypot(dx, dz);
+          const cos = d > 0 ? (dx * FWD.x + dz * FWD.z) / d : 0;
+          if (cos > COS_CONE) {
+            const edge = Math.min(1, (cos - COS_CONE) / 0.08);
+            for (const w of fronts) lit += Math.exp(-((d - w.r) ** 2) / 0.03) * w.fade * edge;
+          }
         }
         const base = 0.07 + 0.2 * depth;
-        const r = Math.max(0.55, q.s * 0.011 + lit * 1.4);
+        const r = Math.max(0.55, q.s * 0.011 + lit * 1.3);
         ctx.fillStyle = lit > 0.05
-          ? `rgba(79,192,225,${Math.min(1, base + lit * 0.75)})`
+          ? `rgba(79,192,225,${Math.min(1, base + lit * 0.8)})`
           : `rgba(16,108,128,${base})`;
         ctx.beginPath(); ctx.arc(q.x, q.y, r, 0, 6.2832); ctx.fill();
       }
@@ -188,64 +213,76 @@ export function initHeroScene(root: HTMLElement) {
     return P(c.x, BOX.h, c.z);
   }
 
-  // ── 雷射光束 ──
-  function drawBeam(du: number, detected: boolean, since: number, t: number) {
-    const s = P(S.x, 0.1, S.z);
-    const len = detected ? du - BOX.depth : DET;
-    const tip = along(len);
-    const spreadEnd = 0.12 + len * 0.2;
-    const l = along(len, -spreadEnd), r = along(len, spreadEnd);
-    const tq = P(tip.x, detected ? BOX.h * 0.55 : 0.02, tip.z), lq = P(l.x, 0.02, l.z), rq = P(r.x, 0.02, r.z);
+  // 聲波波前：沿行進方向、立在地面上的「)」形弧（球面波的縱切面），世界座標取樣後投影
+  function arcPath(cx: number, cz: number, dir: V2, r: number, half: number, y0: number) {
+    const n = 22;
+    const hh = Math.min(0.1 + r * 0.14, 0.42);   // 弧的半高：近處小、遠處有上限，不會衝進標題區
+    const bow = Math.min(r * 0.18, 0.5);           // 弧的彎曲深度
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i <= n; i++) {
+      const u = -1 + (2 * i) / n;                  // -1 … 1
+      const a = u * half;
+      const d = r - bow * (1 - Math.cos(a)) / (1 - Math.cos(half));
+      const wx = cx + dir.x * d, wz = cz + dir.z * d;
+      const wy = y0 + u * hh;
+      if (wy < 0.005 || wz < 0.6) continue;
+      const q = P(wx, wy, wz);
+      if (started) ctx.lineTo(q.x, q.y); else { ctx.moveTo(q.x, q.y); started = true; }
+    }
+  }
 
-    // 光錐
-    const cone = ctx.createLinearGradient(s.x, s.y, tq.x, tq.y);
-    cone.addColorStop(0, `rgba(79,192,225,${detected ? 0.34 : 0.22})`);
-    cone.addColorStop(1, `rgba(102,194,174,${detected ? 0.12 : 0})`);
-    ctx.fillStyle = cone;
+  function drawWaves(du: number, waves: Wave[], state: 'idle' | 'alert' | 'safe', t: number, alpha: number) {
+    const s = P(S.x, 0.1, S.z);
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    // 感測範圍：極淡的扇形底色
+    const reach = Math.min(du - BOX.depth, DET);
+    const l = along(reach * Math.cos(HALF), -reach * Math.sin(HALF)), r = along(reach * Math.cos(HALF), reach * Math.sin(HALF));
+    const lq = P(l.x, 0, l.z), rq = P(r.x, 0, r.z), mq = P(along(reach).x, 0, along(reach).z);
+    const fan = ctx.createLinearGradient(s.x, s.y, mq.x, mq.y);
+    fan.addColorStop(0, 'rgba(79,192,225,.16)'); fan.addColorStop(1, 'rgba(102,194,174,0)');
+    ctx.fillStyle = fan;
     ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(lq.x, lq.y); ctx.lineTo(rq.x, rq.y); ctx.closePath(); ctx.fill();
 
-    // 中心雷射線（天青 → 薄荷）
-    const g = ctx.createLinearGradient(s.x, s.y, tq.x, tq.y);
-    g.addColorStop(0, 'rgba(79,192,225,.95)');
-    g.addColorStop(1, detected ? 'rgba(102,194,174,.95)' : 'rgba(102,194,174,0)');
-    ctx.save();
-    ctx.shadowColor = 'rgba(79,192,225,.8)'; ctx.shadowBlur = detected ? 10 : 4;
-    ctx.strokeStyle = g; ctx.lineWidth = detected ? 2.2 : 1.4;
-    ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(tq.x, tq.y); ctx.stroke();
-    ctx.restore();
-
-    // 行進中的脈衝光點
-    for (let i = 0; i < 3; i++) {
-      const u = ((t * 0.9 + i / 3) % 1);
-      const p = { x: s.x + (tq.x - s.x) * u, y: s.y + (tq.y - s.y) * u };
-      const rr = 2.2 + 2.2 * (1 - u);
-      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr * 4);
-      glow.addColorStop(0, 'rgba(255,255,255,.95)'); glow.addColorStop(0.3, 'rgba(79,192,225,.7)'); glow.addColorStop(1, 'rgba(79,192,225,0)');
-      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(p.x, p.y, rr * 4, 0, 6.2832); ctx.fill();
+    // 發射波（天青）
+    for (const w of waves) {
+      if (w.r <= 0.05) continue;
+      const a = w.fade * 0.9;
+      arcPath(S.x, S.z, FWD, w.r, 0.62, 0.1);
+      ctx.strokeStyle = `rgba(79,192,225,${a * 0.2})`; ctx.lineWidth = 10; ctx.stroke();   // 柔光
+      ctx.strokeStyle = `rgba(79,192,225,${a})`; ctx.lineWidth = 2.6; ctx.stroke();
     }
 
-    // 量測刻度（鎖定後）
-    if (detected) {
-      const k = Math.min(1, since / 0.4);
-      ctx.save(); ctx.globalAlpha = k;
-      ctx.strokeStyle = 'rgba(13,106,134,.7)'; ctx.lineWidth = 1.2;
-      const n = 6;
-      const ang = Math.atan2(tq.y - s.y, tq.x - s.x) + Math.PI / 2;
-      for (let i = 1; i < n; i++) {
-        const u = i / n, px = s.x + (tq.x - s.x) * u, py = s.y + (tq.y - s.y) * u, L = i % 2 ? 4 : 7;
-        ctx.beginPath(); ctx.moveTo(px - Math.cos(ang) * L, py - Math.sin(ang) * L); ctx.lineTo(px + Math.cos(ang) * L, py + Math.sin(ang) * L); ctx.stroke();
+    // 回波（由障礙物反射回感測器）
+    if (state !== 'idle') {
+      const back = { x: -FWD.x, z: -FWD.z };
+      const o = along(du - BOX.depth);
+      const col = state === 'alert' ? '224,138,30' : '63,174,148';
+      for (const w of waves) {
+        if (w.echo < 0) continue;
+        const a = w.echoFade * 0.85 * alpha;
+        arcPath(o.x, o.z, back, Math.max(0.04, w.echo), 0.55, BOX.h * 0.5);
+        ctx.strokeStyle = `rgba(${col},${a * 0.22})`; ctx.lineWidth = 8; ctx.stroke();
+        ctx.strokeStyle = `rgba(${col},${a})`; ctx.lineWidth = 2.2; ctx.setLineDash([6, 5]); ctx.stroke(); ctx.setLineDash([]);
       }
-      // 命中光點
-      const hit = ctx.createRadialGradient(tq.x, tq.y, 0, tq.x, tq.y, 18);
-      hit.addColorStop(0, 'rgba(255,255,255,.95)'); hit.addColorStop(0.35, 'rgba(79,192,225,.55)'); hit.addColorStop(1, 'rgba(79,192,225,0)');
-      ctx.fillStyle = hit; ctx.beginPath(); ctx.arc(tq.x, tq.y, 18, 0, 6.2832); ctx.fill();
-      ctx.restore();
+      // 碰撞點的反射亮點
+      const hq = P(o.x, BOX.h * 0.5, o.z);
+      const pulse = 0.6 + 0.4 * Math.abs(Math.sin(t * 5));
+      const hit = ctx.createRadialGradient(hq.x, hq.y, 0, hq.x, hq.y, 22);
+      hit.addColorStop(0, `rgba(255,255,255,${0.9 * pulse * alpha})`); hit.addColorStop(0.35, `rgba(${col},${0.45 * pulse * alpha})`); hit.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = hit; ctx.beginPath(); ctx.arc(hq.x, hq.y, 22, 0, 6.2832); ctx.fill();
     }
 
-    // 感測器光點（呼吸）
-    const br = 5 + (still ? 0 : 1.6 * Math.sin(t * 2.6));
-    ctx.fillStyle = 'rgba(79,192,225,.28)'; ctx.beginPath(); ctx.arc(s.x, s.y, br * 2.4, 0, 6.2832); ctx.fill();
+    // 感測器：發射時的小圓環 ＋ 呼吸光點
+    const phase = (t % EMIT) / EMIT;
+    ctx.strokeStyle = `rgba(79,192,225,${0.6 * (1 - phase)})`; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(s.x, s.y, 5 + phase * 16, 0, 6.2832); ctx.stroke();
+    const br = 5 + (still ? 0 : 1.4 * Math.sin(t * 2.6));
+    ctx.fillStyle = 'rgba(79,192,225,.28)'; ctx.beginPath(); ctx.arc(s.x, s.y, br * 2.2, 0, 6.2832); ctx.fill();
     ctx.fillStyle = '#0d6a86'; ctx.beginPath(); ctx.arc(s.x, s.y, 4, 0, 6.2832); ctx.fill();
+    ctx.restore();
     return s;
   }
 
@@ -316,10 +353,13 @@ export function initHeroScene(root: HTMLElement) {
     const safe = detected && since >= SAFE_AFTER;
     const alpha = Math.min(1, t / 0.6) * (t > 7.0 ? Math.max(0, 1 - (t - 7.0) / 0.7) : 1);
 
+    const state = !detected ? 'idle' : safe ? 'safe' : 'alert';
+    const waves = wavesAt(t, du);
+
     ctx.clearRect(0, 0, W, H);
-    drawFloor(s, du, total, detected);
-    const top = drawObstacle(du, alpha, !detected ? 'idle' : safe ? 'safe' : 'alert', since);
-    const sq = drawBeam(du, detected, since, total);
+    drawFloor(s, waves);
+    const top = drawObstacle(du, alpha, state, since);
+    const sq = drawWaves(du, waves, state, total, alpha);
 
     // 鞋子對位：感測模組在示意圖中約位於 (352, 88)／(554, 248)
     const sw = shoe.clientWidth, sh = sw * 248 / 554;
@@ -338,7 +378,6 @@ export function initHeroScene(root: HTMLElement) {
     hud.classList.toggle('safe', safe);
     hud.style.transform = `translate3d(${top.x}px, ${top.y - 18}px, 0) translate(-50%, -100%)`;
     hudTitle.textContent = safe ? '已於跌倒前預警' : '偵測到前方障礙物';
-    hudDist.textContent = `${(Math.max(0, du - BOX.depth) / M_PER).toFixed(1)} m`;
 
     drawGait(total, cycleIndex, detected);
     if (!still && running) raf = requestAnimationFrame(frame);
