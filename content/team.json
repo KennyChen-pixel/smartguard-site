@@ -19,10 +19,27 @@
     "caption": "團隊於 Medical Taiwan 台灣國際醫療暨健康照護展，現場展出智慧主動式防跌偵測系統"
   },
   "membersTitle": "團隊成員",
+  "_members來源": "姓名、職稱、職責依《SmartGuard_Ustart_二階營運計畫簡報_v5》第 15 頁原文；照片取自 2026 gsic 競賽圖庫具名檔案，統一裁切為 4:5。",
   "members": [
-    { "name": "TODO：姓名", "role": "TODO：職稱", "bio": "TODO：一句話介紹", "photo": "" },
-    { "name": "TODO：姓名", "role": "TODO：職稱", "bio": "TODO：一句話介紹", "photo": "" },
-    { "name": "TODO：姓名", "role": "TODO：職稱", "bio": "TODO：一句話介紹", "photo": "" }
+    {
+      "name": "陳璟 Kenny",
+      "role": "Co-Founder & CTO ｜ 技術研發長",
+      "bio": "【感測與演算法】原型整合、步態演算法開發、硬體迭代與專利商用化",
+      "photo": "team-chen-jing.jpg"
+    },
+    {
+      "name": "蕭喻心",
+      "role": "Co-Founder & CEO ｜ 執行長",
+      "bio": "【商業・市場・政府計畫】團隊發展方向、場域驗證協調、行銷推廣與商業模式整合",
+      "photo": "team-hsiao-yu-hsin.jpg"
+    },
+    {
+      "name": "范哲銓",
+      "role": "COO ｜ 營運長",
+      "bio": "【場域執行・供應鏈】場域測試執行、供應鏈管理、成本控管與流程優化",
+      "photo": "",
+      "_待補": "TODO：個人照片（放入 src/assets/images/ 後填入檔名，建議直式 4:5）"
+    }
   ],
   "partnersTitle": "合作夥伴",
   "partners": [
