@@ -1,0 +1,48 @@
+---
+// 「事前防護 vs 事後通報」對照：介入點在跌倒之前
+---
+<figure class="pt card" data-reveal>
+  <div class="track" aria-hidden="true">
+    <div class="zone before"><span>事前防護</span></div>
+    <div class="zone after"><span>事後通報</span></div>
+    <div class="event"><i></i></div>
+    <div class="walker" data-walker><i></i></div>
+  </div>
+  <div class="legend">
+    <div class="col">
+      <p class="k mono">SMARTGUARD</p>
+      <p class="v">距離感測，在風險形成之前主動預警</p>
+    </div>
+    <div class="col">
+      <p class="k mono">TRADITIONAL IMU</p>
+      <p class="v">姿態判讀，於跌倒發生之後才通報</p>
+    </div>
+  </div>
+</figure>
+<style>
+  .pt { padding: clamp(20px, 3vw, 36px); }
+  .track { position: relative; height: 92px; border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: 58% 42%; }
+  .zone { display: flex; align-items: flex-end; padding: 12px 16px; font-weight: 700; font-size: 0.95rem; }
+  .before { background: linear-gradient(90deg, rgba(102, 194, 174, 0.1), rgba(102, 194, 174, 0.32)); color: var(--mint-ink); }
+  .after { background: repeating-linear-gradient(135deg, rgba(18, 38, 45, 0.05) 0 8px, rgba(18, 38, 45, 0.09) 8px 16px); color: var(--ink-soft); justify-content: flex-end; }
+  .event { position: absolute; left: 58%; top: 0; bottom: 0; width: 2px; background: var(--ink); }
+  .event i { position: absolute; top: 10px; left: -6px; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); }
+  .walker { position: absolute; top: 18px; left: 0; width: 100%; height: 30px; }
+  .walker i {
+    position: absolute; left: 4%; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--brand-grad); box-shadow: 0 0 0 6px rgba(79, 192, 225, 0.2);
+    animation: sg-walk 5s var(--ease-out) infinite;
+  }
+  @keyframes sg-walk {
+    0% { left: 4%; box-shadow: 0 0 0 6px rgba(79, 192, 225, 0.2); }
+    45% { left: 38%; box-shadow: 0 0 0 6px rgba(79, 192, 225, 0.2); }
+    52% { left: 41%; box-shadow: 0 0 0 14px rgba(224, 138, 30, 0.35); }
+    70% { left: 46%; box-shadow: 0 0 0 8px rgba(102, 194, 174, 0.35); }
+    100% { left: 50%; box-shadow: 0 0 0 8px rgba(102, 194, 174, 0.35); }
+  }
+  .legend { display: grid; gap: 16px; margin-top: 22px; grid-template-columns: 1fr 1fr; }
+  .k { font-size: 0.75rem; letter-spacing: 0.14em; color: var(--cyan-ink); }
+  .col:last-child .k { color: var(--ink-soft); }
+  .v { margin-top: 4px; font-weight: 700; color: var(--ink); line-height: 1.6; }
+  @media (max-width: 560px) { .legend { grid-template-columns: 1fr; } .zone { font-size: 0.85rem; } }
+</style>

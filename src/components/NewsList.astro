@@ -1,0 +1,65 @@
+---
+import news from '../../content/news.json';
+import Icon from './Icon.astro';
+interface Props { limit?: number }
+const { limit } = Astro.props;
+const items = limit ? news.items.slice(0, limit) : news.items;
+---
+<ol class="timeline" data-timeline>
+  <span class="rail" aria-hidden="true"><span class="fill" data-fill></span></span>
+  {items.map((n, i) => {
+    const hasLink = !!n.url;
+    const Tag = hasLink ? 'a' : 'div';
+    return (
+      <li data-reveal style={`--d:${Math.min(i, 4) * 0.08}s`}>
+        <span class="node" aria-hidden="true"><Icon name={n.icon} size={18} /></span>
+        <Tag
+          class:list={['card', 'item', { linked: hasLink }]}
+          href={hasLink ? n.url : undefined}
+          target={hasLink ? '_blank' : undefined}
+          rel={hasLink ? 'noopener noreferrer' : undefined}
+        >
+          <div>
+            <p class="date mono">{n.date}</p>
+            <h3>{n.title}</h3>
+          </div>
+          {hasLink && (
+            <span class="go">
+              <Icon name="ArrowUpRight" size={20} />
+              <span class="sr-only">（另開新視窗）</span>
+            </span>
+          )}
+        </Tag>
+      </li>
+    );
+  })}
+</ol>
+<style>
+  .timeline { position: relative; list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+  .rail { position: absolute; left: 21px; top: 24px; bottom: 24px; width: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .fill { position: absolute; inset: 0; background: var(--brand-grad); transform-origin: top; transform: scaleY(var(--p, 0)); }
+  li { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 18px; align-items: start; }
+  .node { position: relative; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; margin-top: 14px; border-radius: 50%; background: var(--surface); border: 1.5px solid rgba(79, 192, 225, 0.6); color: var(--cyan-ink); box-shadow: 0 0 0 6px var(--paper); }
+  .item { position: relative; display: block; padding: 22px 24px; }
+  .item.linked { padding-right: 72px; }
+  .item .go { position: absolute; top: 18px; right: 18px; }
+  h3 { overflow-wrap: anywhere; }
+  @media (max-width: 560px) { li { grid-template-columns: 36px 1fr; gap: 12px; } .node { width: 36px; height: 36px; } .rail { left: 17px; } .item { padding: 18px; } .item.linked { padding-right: 60px; } .item .go { top: 14px; right: 12px; } }
+  .date { font-size: 0.8rem; letter-spacing: 0.1em; color: var(--cyan-ink); }
+  h3 { margin-top: 6px; font-size: clamp(1.02rem, 1.4vw, 1.15rem); line-height: 1.65; font-weight: 700; }
+  .go { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: var(--cyan-ink); background: rgba(79, 192, 225, 0.1); transition: transform 0.3s var(--ease-out), background 0.3s; }
+  a.item:hover .go { transform: translate(2px, -2px); background: rgba(79, 192, 225, 0.2); }
+</style>
+<script>
+  // 時間軸隨捲動填色
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
+  document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((tl) => {
+    const update = () => {
+      const r = tl.getBoundingClientRect();
+      const p = reduce ? 1 : Math.min(1, Math.max(0, (innerHeight * 0.75 - r.top) / r.height));
+      tl.style.setProperty('--p', String(p));
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+  });
+</script>

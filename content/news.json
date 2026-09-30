@@ -1,0 +1,45 @@
+{
+  "_說明": "最新消息與榮譽。新增一則：在 items 最上方加一筆（由新到舊）。date 為顯示文字；icon 可用：Radio、Award、FileBadge、Medal；url 填新聞稿或公告連結，沒有就留空字串。首頁會自動顯示最上面 3 則。",
+  "seo": {
+    "title": "最新消息與榮譽｜智感先鋒科技",
+    "description": "智感先鋒科技的展會參與、創業計畫、專利與獎項等最新消息。"
+  },
+  "items": [
+    {
+      "date": "2026/08/05-08/06",
+      "title": "智感先鋒科技將參展 2026 第二屆 BIOMED-X 生醫新創媒合博覽會，歡迎蒞臨交流",
+      "icon": "Radio",
+      "url": "https://www.biomed-x.com.tw/"
+    },
+    {
+      "date": "2026",
+      "title": "智感先鋒科技將於 6/25-27 Medical Taiwan 2026 展出主動式防跌系統",
+      "icon": "Radio",
+      "url": "https://www.medicaltaiwan.com.tw/zh-tw/menu/7EB43B97FCB8AED7D0636733C6861689/info.html"
+    },
+    {
+      "date": "2026",
+      "title": "中山大學攜智感先鋒科技亮相 Medical Taiwan 2026，智慧防跌系統獲實測肯定",
+      "icon": "Award",
+      "url": "https://www.medicaltaiwan.com.tw/zh-tw/news/80BFA2BD900FC425/info.html"
+    },
+    {
+      "date": "2026",
+      "title": "智感先鋒科技入選教育部 U-start 創業計畫，獲創業資源挹注",
+      "icon": "Award",
+      "url": "https://ustart.yda.gov.tw/p/16-1000-2210.php?Lang=zh-tw"
+    },
+    {
+      "date": "2025",
+      "title": "取得中華民國新型專利（專利公告號：M656911）",
+      "icon": "FileBadge",
+      "url": ""
+    },
+    {
+      "date": "2023",
+      "title": "榮獲國際發明展銀牌獎，技術實力獲國際肯定",
+      "icon": "Medal",
+      "url": ""
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+---
+// 捲動時逐步畫出的「前方距離」訊號圖：距離下降 → 越過預警線 → 預警 → 放慢
+// 文字標籤用 HTML 疊在圖上，手機縮小時字級不會跟著變小
+---
+<figure class="chart card" data-chart>
+  <div class="plot">
+    <svg viewBox="0 0 1000 300" preserveAspectRatio="none" role="img" aria-label="前方距離隨時間下降，越過預警距離時系統主動預警，之後距離變化趨緩">
+      <defs>
+        <linearGradient id="sg-line" x1="0" x2="1">
+          <stop offset="0" stop-color="#4fc0e1" />
+          <stop offset="1" stop-color="#66c2ae" />
+        </linearGradient>
+        <linearGradient id="sg-area" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#4fc0e1" stop-opacity=".22" />
+          <stop offset="1" stop-color="#4fc0e1" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <line x1="0" x2="1000" y1="170" y2="170" class="thr" vector-effect="non-scaling-stroke" />
+      <path class="area" d="M0 60 C120 64 220 72 320 92 S480 140 560 170 C600 185 640 196 700 204 S860 214 1000 218 L1000 300 L0 300 Z" />
+      <path class="line" pathLength="1" vector-effect="non-scaling-stroke" d="M0 60 C120 64 220 72 320 92 S480 140 560 170 C600 185 640 196 700 204 S860 214 1000 218" />
+      <line class="evt-line" x1="560" x2="560" y1="0" y2="300" vector-effect="non-scaling-stroke" />
+    </svg>
+    <span class="dot" aria-hidden="true"></span>
+    <span class="lab y" aria-hidden="true">前方距離</span>
+    <span class="lab x" aria-hidden="true">時間</span>
+    <span class="lab thr-t" aria-hidden="true">預警距離</span>
+    <span class="evt-t" aria-hidden="true">主動預警</span>
+  </div>
+</figure>
+<style>
+  .chart { padding: clamp(14px, 2vw, 22px); overflow: hidden; }
+  .plot {
+    position: relative; height: clamp(210px, 26vw, 300px); border-radius: 12px; overflow: hidden;
+    background-image: linear-gradient(var(--paper-grid) 1px, transparent 1px), linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .thr { stroke: var(--alert); stroke-width: 1.6; stroke-dasharray: 8 7; }
+  .line { fill: none; stroke: url(#sg-line); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--p, 1)); }
+  .area { fill: url(#sg-area); opacity: var(--p, 1); }
+  .evt-line { stroke: var(--alert); stroke-width: 2; opacity: var(--e, 1); transition: opacity 0.5s; }
+  .dot { position: absolute; left: 56%; top: 56.7%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--alert); box-shadow: 0 0 0 7px rgba(224, 138, 30, 0.22); opacity: var(--e, 1); transition: opacity 0.5s; }
+  .lab { position: absolute; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; color: var(--ink-soft); }
+  .y { left: 12px; top: 8px; }
+  .x { right: 12px; bottom: 6px; }
+  .thr-t { right: 12px; top: calc(56.7% - 28px); font-family: var(--font-sans); font-weight: 700; letter-spacing: 0; color: var(--alert-ink); }
+  .evt-t {
+    position: absolute; left: calc(56% + 14px); top: 10%; padding: 6px 14px; border-radius: 10px; background: #fff;
+    border: 1px solid rgba(224, 138, 30, 0.6); font-weight: 700; font-size: 0.95rem; color: var(--ink);
+    box-shadow: 0 10px 20px -14px rgba(12, 46, 54, 0.5); opacity: var(--e, 1); transition: opacity 0.5s;
+  }
+</style>
+<script>
+  // 減少動態或截圖模式（網址帶 ?t=）：直接呈現完成狀態
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
+  document.querySelectorAll<HTMLElement>('[data-chart]').forEach((el) => {
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      const p = reduce ? 1 : Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height * 0.9)));
+      el.style.setProperty('--p', p.toFixed(3));
+      el.style.setProperty('--e', p > 0.56 ? '1' : '0');
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+  });
+</script>

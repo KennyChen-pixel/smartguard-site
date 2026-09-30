@@ -1,0 +1,55 @@
+---
+import home from '../../content/home.json';
+import Icon from './Icon.astro';
+const c = home.cta;
+---
+<section class="cta on-deep" aria-labelledby="cta-title">
+  <canvas class="waves" data-waves aria-hidden="true"></canvas>
+  <div class="container inner" data-reveal>
+    <p class="eyebrow">{c.eyebrow}</p>
+    <h2 id="cta-title" class="h2">{c.title}</h2>
+    <p class="lede">{c.body}</p>
+    <div class="btns">
+      {c.buttons.map((b) => (
+        <a class={`btn btn-${b.style}`} href={b.href}>
+          {b.label}{b.style === 'primary' && <Icon name="ArrowRight" />}
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+<style>
+  .cta { position: relative; overflow: hidden; padding-block: clamp(80px, 11vw, 144px); }
+  .cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60vw 60vh at 85% 0%, rgba(79, 192, 225, 0.22), transparent 65%), radial-gradient(50vw 50vh at 0% 100%, rgba(102, 194, 174, 0.2), transparent 65%); }
+  .waves { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; }
+  .inner { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .lede { margin-inline: auto; }
+  .btns { margin-top: 34px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+</style>
+<script>
+  // 深色背景上緩慢流動的感測波形
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLCanvasElement>('[data-waves]').forEach((cv) => {
+    const ctx = cv.getContext('2d')!;
+    let w = 0, h = 0, on = false, raf = 0;
+    const size = () => { const d = Math.min(devicePixelRatio || 1, 2); w = cv.clientWidth; h = cv.clientHeight; cv.width = w * d; cv.height = h * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, w, h);
+      for (let k = 0; k < 4; k++) {
+        const y0 = h * (0.3 + k * 0.14), amp = 14 + k * 6, speed = 0.00025 * (k + 1);
+        const g = ctx.createLinearGradient(0, 0, w, 0);
+        g.addColorStop(0, 'rgba(79,192,225,0)'); g.addColorStop(0.5, `rgba(79,192,225,${0.35 - k * 0.06})`); g.addColorStop(1, 'rgba(102,194,174,0)');
+        ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.beginPath();
+        for (let x = 0; x <= w; x += 6) {
+          const y = y0 + Math.sin(x * 0.006 + t * speed + k) * amp + Math.sin(x * 0.017 - t * speed * 1.7) * amp * 0.35;
+          x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.stroke();
+      }
+      if (on && !reduce) raf = requestAnimationFrame(draw);
+    };
+    size(); draw(0);
+    addEventListener('resize', () => { size(); draw(performance.now()); });
+    new IntersectionObserver(([e]) => { on = e.isIntersecting; cancelAnimationFrame(raf); if (on && !reduce) raf = requestAnimationFrame(draw); }).observe(cv);
+  });
+</script>

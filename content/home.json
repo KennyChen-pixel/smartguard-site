@@ -1,0 +1,39 @@
+{
+  "_說明": "首頁文字。hero 為首屏主標題區；trust 為信任數據列；techIntro / about 為首頁各區塊的導讀。",
+  "seo": {
+    "title": "智感先鋒科技 SmartGuard Tech｜智慧銀髮跌倒防護系統",
+    "description": "智慧感測，主動守護。智感先鋒科技以獨家距離感測技術，打造專為長者設計的穿戴式主動防跌系統，在跌倒發生之前築起防線。"
+  },
+  "hero": {
+    "eyebrow": "SMARTGUARD · AI 驅動主動防跌技術",
+    "title": "智慧感測，主動守護",
+    "subtitle": "重新定義銀髮安全新標準",
+    "lede": "專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險，在跌倒發生「之前」就築起防線。",
+    "ctaPrimary": { "label": "預約產品展示", "href": "/contact?type=產品諮詢" },
+    "ctaSecondary": { "label": "了解核心技術", "href": "/technology" }
+  },
+  "trust": [
+    { "value": "國際發明展", "label": "銀牌獎肯定" },
+    { "value": "M656911", "label": "中華民國新型專利" },
+    { "value": "92%", "label": "受測長者行走安心感提升", "source": "資料來源：高雄市鼓山區日照中心訪談" }
+  ],
+  "techIntro": {
+    "eyebrow": "CORE TECHNOLOGY",
+    "title": "核心技術與產品特點",
+    "body": "我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，進化為**主動預防跌倒**。"
+  },
+  "newsIntro": {
+    "eyebrow": "NEWS & HONORS",
+    "title": "最新消息與榮譽"
+  },
+  "cta": {
+    "eyebrow": "CONTACT",
+    "title": "商務合作與產品諮詢",
+    "body": "無論您是照護機構、通路夥伴或關心家中長輩的家屬，歡迎與我們聯繫，我們將於三個工作天內回覆。",
+    "buttons": [
+      { "label": "預約產品展示", "href": "/contact?type=產品諮詢", "style": "primary" },
+      { "label": "合作洽談", "href": "/contact?type=商務合作", "style": "ghost" },
+      { "label": "聯絡我們", "href": "/contact", "style": "link" }
+    ]
+  }
+}

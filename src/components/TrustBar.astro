@@ -1,0 +1,51 @@
+---
+import home from '../../content/home.json';
+---
+<section class="trust" aria-label="榮譽與實證">
+  <div class="container">
+    <ul class="row">
+      {home.trust.map((t, i) => (
+        <li data-reveal style={`--d:${i * 0.1}s`}>
+          <p class="v" data-count={/^\d+%$/.test(t.value) ? t.value : undefined}>{t.value}</p>
+          <p class="l">{t.label}</p>
+          {'source' in t && t.source && <p class="src">{t.source}</p>}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+<style>
+  .trust { position: relative; z-index: 2; background: var(--surface); border-block: 1px solid var(--line); }
+  .row { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr; }
+  li { padding: 30px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  li + li { border-top: 1px solid var(--line); }
+  .v { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.7rem, 2.8vw, 2.4rem); line-height: 1.25; letter-spacing: 0.04em;
+    background: linear-gradient(120deg, #0d6a86, #1b6f5b); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; }
+  .l { margin-top: 6px; font-weight: 500; color: var(--ink); }
+  .src { margin-top: 4px; font-size: 0.8rem; color: var(--ink-soft); }
+  @media (min-width: 768px) {
+    .row { grid-template-columns: repeat(3, 1fr); }
+    li + li { border-top: 0; border-left: 1px solid var(--line); }
+    li { padding: 40px 16px; }
+  }
+</style>
+<script>
+  // 百分比數字進場時由 0 開始計數
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+    if (reduce) return;
+    const target = parseInt(el.dataset.count!, 10);
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const t0 = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - t0) / 1400);
+        el.textContent = `${Math.round(target * (1 - Math.pow(1 - k, 3)))}%`;
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }, { threshold: 0.6 });
+    io.observe(el);
+  });
+</script>

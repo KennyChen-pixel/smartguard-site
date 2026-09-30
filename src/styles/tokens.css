@@ -1,0 +1,56 @@
+/* ============================================================
+   SmartGuard 設計系統 Tokens（核心檔案，改版後請勿隨意修改）
+   色彩取自品牌 LOGO：天青 #4FC0E1 × 薄荷 #66C2AE
+   所有「文字色」皆已確認在對應底色上達 WCAG AA（≥ 4.5:1）
+   ============================================================ */
+:root {
+  /* 品牌色（裝飾、線條、光效用；不直接當小字文字色） */
+  --brand-cyan: #4fc0e1;
+  --brand-mint: #66c2ae;
+  --brand-grad: linear-gradient(120deg, #4fc0e1 0%, #66c2ae 100%);
+
+  /* 文字階（可讀） */
+  --cyan-ink: #0d6a86;     /* 5.6:1 on paper */
+  --mint-ink: #1b6f5b;     /* 5.9:1 on paper */
+  --ink: #12262d;          /* 14:1 */
+  --ink-soft: #42585e;     /* 7:1 */
+  --alert-ink: #a3560a;    /* 4.9:1，警示文字 */
+
+  /* 背景 */
+  --paper: #f4f8f7;        /* 醫療方格紙 */
+  --paper-grid: #e1ede9;
+  --paper-grid-major: #cfe3dc;
+  --surface: #ffffff;
+  --deep: #0c2e36;         /* 深色區塊 */
+  --deep-2: #103a44;
+  --on-deep: #eaf5f4;      /* 13:1 on deep */
+  --on-deep-soft: #a9c6c8; /* 7.4:1 on deep */
+
+  /* 功能色 */
+  --alert: #e08a1e;        /* 警示光效 */
+  --warm-glow: rgba(255, 206, 160, 0.32);
+  --line: rgba(18, 38, 45, 0.12);
+  --line-strong: rgba(18, 38, 45, 0.22);
+
+  /* 字體 */
+  --font-display: 'Noto Serif TC', 'Songti TC', 'PMingLiU', serif;
+  --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --font-mono: 'Azeret Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* 字級（長輩友善：內文 17px 起） */
+  --fs-body: 1.0625rem;
+  --fs-small: 0.9375rem;
+  --fs-eyebrow: 0.78rem;
+  --fs-h1: clamp(2.6rem, 6.4vw, 6rem);
+  --fs-h2: clamp(1.9rem, 3.6vw, 3.1rem);
+  --fs-h3: clamp(1.2rem, 1.6vw, 1.4rem);
+
+  /* 版面 */
+  --container: 1200px;
+  --gutter: clamp(16px, 4vw, 56px);
+  --section-y: clamp(72px, 10vw, 136px);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow-soft: 0 18px 40px -26px rgba(12, 46, 54, 0.45);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

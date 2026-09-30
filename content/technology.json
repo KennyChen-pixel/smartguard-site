@@ -1,0 +1,28 @@
+{
+  "_說明": "技術與原理頁。comparison 為「距離感測 vs 傳統 IMU」說明；points 的 icon 可用：Eye、Radio、HeartHandshake、Shield、Cpu。",
+  "seo": {
+    "title": "技術與原理｜距離感測主動防跌｜智感先鋒科技",
+    "description": "我們以距離感測技術取代傳統單純的 IMU 步態分析，從被動偵測跌倒，進化為主動預防跌倒。"
+  },
+  "eyebrow": "CORE TECHNOLOGY",
+  "title": "核心技術與產品特點",
+  "body": "我們以「距離感測技術」取代傳統單純的 IMU 步態分析，從被動偵測跌倒，進化為**主動預防跌倒**。",
+  "comparison": {
+    "title": "距離感測 ≠ 傳統 IMU",
+    "highlight": "預防，發生在跌倒之前",
+    "points": [
+      { "icon": "Eye", "text": "即時掃描長者與環境間的空間距離，於碰撞風險形成前主動預警。" },
+      { "icon": "Radio", "text": "不依賴跌倒後的姿態判讀，真正做到「事前防護」而非「事後通報」。" },
+      { "icon": "HeartHandshake", "text": "輕量無感配戴，讓守護自然融入長輩的每一步日常。" }
+    ]
+  },
+  "flow": {
+    "eyebrow": "HOW IT WORKS",
+    "title": "TODO：運作流程標題",
+    "steps": [
+      { "title": "TODO：步驟一", "text": "TODO：說明文字" },
+      { "title": "TODO：步驟二", "text": "TODO：說明文字" },
+      { "title": "TODO：步驟三", "text": "TODO：說明文字" }
+    ]
+  }
+}

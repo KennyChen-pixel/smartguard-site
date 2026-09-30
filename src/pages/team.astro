@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import SectionHead from '../components/SectionHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+import team from '../../content/team.json';
+import { getImage, hasImage } from '../lib/images';
+import { isTodo } from '../lib/text';
+const photo = getImage(team.photo.image);
+---
+<BaseLayout title={team.seo.title} description={team.seo.description}>
+  <PageHeader eyebrow={team.about.eyebrow} title={team.about.title} />
+
+  <section class="section">
+    <div class="container story">
+      <blockquote data-reveal><p>「{team.about.quote}」</p></blockquote>
+      <div class="paras">
+        {team.about.paragraphs.map((p, i) => <p data-reveal style={`--d:${i * 0.1}s`}>{p}</p>)}
+      </div>
+    </div>
+    <div class="container">
+      <figure class="photo" data-reveal>
+        <Image src={photo} alt={team.photo.alt} widths={[640, 960, 1400]} sizes="(max-width: 1100px) 92vw, 1000px" />
+        <figcaption>{team.photo.caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section paper-grid">
+    <div class="container">
+      <SectionHead eyebrow="TEAM" title={team.membersTitle} />
+      <ul class="members">
+        {team.members.map((m, i) => (
+          <li class:list={['card', 'lift', { todo: isTodo(m.name) }]} data-reveal style={`--d:${i * 0.1}s`}>
+            <div class="avatar">
+              {hasImage(m.photo)
+                ? <Image src={getImage(m.photo)} alt={m.name} width={160} height={160} />
+                : <span aria-hidden="true">{m.name.replace('TODO：', '').slice(0, 1)}</span>}
+            </div>
+            <h3>{m.name}</h3>
+            <p class="role mono">{m.role}</p>
+            <p class="bio">{m.bio}</p>
+          </li>
+        ))}
+      </ul>
+
+      <div class="partners-wrap">
+        <SectionHead eyebrow="PARTNERS" title={team.partnersTitle} />
+        <ul class="partners">
+          {team.partners.map((p) => (
+            <li class:list={['card', { todo: isTodo(p.name) }]} data-reveal>
+              <h3>{p.name}</h3>
+              <p>{p.role}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .story { display: grid; gap: 32px; }
+  @media (min-width: 960px) { .story { grid-template-columns: 1fr 1.1fr; gap: 72px; } }
+  blockquote p { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.4rem, 2.4vw, 2rem); line-height: 1.7; color: var(--ink); }
+  blockquote { padding-left: 24px; border-left: 4px solid; border-image: var(--brand-grad) 1; }
+  .paras { display: grid; gap: 20px; font-size: 1.08rem; }
+  .photo { margin-top: clamp(48px, 6vw, 80px); background: var(--surface); padding: 14px; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow-soft); max-width: 1000px; margin-inline: auto; }
+  .photo :global(img) { width: 100%; border-radius: 12px; }
+  .photo figcaption { padding: 14px 8px 4px; text-align: center; font-size: 0.92rem; }
+  .members { list-style: none; padding: 0; margin-top: 44px; display: grid; gap: 18px; }
+  @media (min-width: 720px) { .members { grid-template-columns: repeat(3, 1fr); } }
+  .members li { padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .avatar { width: 112px; height: 112px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--brand-grad); color: #fff; font-family: var(--font-display); font-weight: 900; font-size: 2.4rem; }
+  .avatar :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .members h3 { margin-top: 18px; font-size: 1.2rem; }
+  .role { margin-top: 4px; font-size: 0.85rem; color: var(--cyan-ink); letter-spacing: 0.06em; }
+  .bio { margin-top: 10px; }
+  .partners-wrap { margin-top: clamp(64px, 8vw, 104px); }
+  .partners { list-style: none; padding: 0; margin-top: 32px; display: grid; gap: 14px; }
+  @media (min-width: 720px) { .partners { grid-template-columns: repeat(3, 1fr); } }
+  .partners li { padding: 22px 24px; }
+  .partners h3 { font-size: 1.05rem; }
+  .partners p { margin-top: 4px; font-size: 0.95rem; }
+</style>

@@ -1,0 +1,15 @@
+---
+import { richText } from '../lib/text';
+interface Props { eyebrow?: string; title: string; body?: string; align?: 'left' | 'center'; as?: 'h1' | 'h2' }
+const { eyebrow, title, body, align = 'left', as: Tag = 'h2' } = Astro.props;
+---
+<div class:list={['head', align]} data-reveal>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <Tag class="h2">{title}</Tag>
+  {body && <p class="lede" set:html={richText(body)} />}
+  <slot />
+</div>
+<style>
+  .head.center { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .head.center .lede { margin-inline: auto; }
+</style>

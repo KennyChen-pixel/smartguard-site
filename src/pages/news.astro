@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import NewsList from '../components/NewsList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import news from '../../content/news.json';
+import home from '../../content/home.json';
+---
+<BaseLayout title={news.seo.title} description={news.seo.description}>
+  <PageHeader eyebrow={home.newsIntro.eyebrow} title={home.newsIntro.title} />
+  <section class="section">
+    <div class="container narrow">
+      <NewsList />
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>
+<style>
+  .narrow { max-width: calc(880px + var(--gutter) * 2); }
+</style>
