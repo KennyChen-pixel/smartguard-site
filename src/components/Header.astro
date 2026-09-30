@@ -33,13 +33,23 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
     ))}
     <a class="btn btn-primary" href={site.navCta.href}>{site.navCta.label}</a>
   </nav>
+  <span class="progress" aria-hidden="true"></span>
 </header>
 
 <style>
   .site-header {
     position: sticky; top: 0; z-index: 50;
+    view-transition-name: site-header;   /* 換頁時頁首保持不動 */
     transition: background-color 0.3s, box-shadow 0.3s, backdrop-filter 0.3s;
   }
+  /* 捲動進度線（品牌漸層）；不支援 scroll-timeline 的瀏覽器不顯示 */
+  .progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brand-grad); transform-origin: left; transform: scaleX(0); pointer-events: none; }
+  @supports (animation-timeline: scroll()) {
+    .progress { animation: sg-progress linear both; animation-timeline: scroll(root); }
+  }
+  @keyframes sg-progress { to { transform: scaleX(1); } }
+  .bar { transition: height 0.35s var(--ease-out); }
+  .scrolled .bar { height: 64px; }
   .site-header.overlay { position: fixed; left: 0; right: 0; }
   .site-header.scrolled, .site-header:not(.overlay), .site-header.open {
     background: rgba(244, 248, 247, 0.86);

@@ -52,8 +52,28 @@ strong { color: var(--ink); font-weight: 700; }
   background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
 }
 
-/* 深色區塊 */
-.on-deep { background: var(--deep); color: var(--on-deep-soft); }
+/* 深色區塊（加一層極細顆粒質感，避免大面積純色顯得扁平） */
+.on-deep {
+  background-color: var(--deep);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: var(--on-deep-soft);
+}
+
+/* 選取文字、捲軸 */
+::selection { background: rgba(79, 192, 225, 0.32); color: var(--ink); }
+html { scrollbar-color: rgba(13, 106, 134, 0.45) transparent; }
+
+/* 換頁過場（瀏覽器原生跨頁 View Transitions，零 JS；不支援的瀏覽器照常換頁） */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: sg-vt-out 0.28s var(--ease-out) both; }
+::view-transition-new(root) { animation: sg-vt-in 0.42s var(--ease-out) both; }
+@keyframes sg-vt-out { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes sg-vt-in { from { opacity: 0; transform: translateY(12px); } }
+
+/* 照片進場：由略微放大緩慢定格（搭配 data-reveal） */
+[data-reveal] .settle { transition: transform 1.4s var(--ease-out); }
+[data-reveal].reveal-pending .settle { transform: scale(1.1); }
+[data-reveal].reveal-ready.is-in .settle { transform: none; }
 .on-deep h1, .on-deep h2, .on-deep h3, .on-deep strong { color: var(--on-deep); }
 
 /* ── 字體 ── */
@@ -123,4 +143,6 @@ a.card:hover, .card.lift:hover { transform: translateY(-4px); box-shadow: var(--
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
   [data-reveal].reveal-pending { opacity: 1; transform: none; }
+  [data-reveal].reveal-pending .settle { transform: none; }
+  @view-transition { navigation: none; }
 }

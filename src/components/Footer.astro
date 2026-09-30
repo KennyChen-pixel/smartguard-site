@@ -12,7 +12,6 @@ const year = new Date().getFullYear();
         <Image src={logo} alt="" width={40} height={46} densities={[1, 2, 3]} />
         <span>{site.name}<small>{site.nameEn}</small></span>
       </a>
-      <p class="line">{site.brandLine}</p>
       <a class="li" href={site.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`${site.name} LinkedIn 官方頁面（另開新視窗）`}>
         <Icon name="Linkedin" size={20} />
       </a>
@@ -33,19 +32,30 @@ const year = new Date().getFullYear();
       </ul>
     </div>
   </div>
+  <div class="container">
+    <p class="sig display">{site.brandLine}</p>
+  </div>
   <div class="container legal">
     <p>© {year} {site.name} {site.nameEn}. All rights reserved.</p>
   </div>
 </footer>
 
 <style>
-  .site-footer { position: relative; padding-top: 72px; }
+  .site-footer { position: relative; padding-top: 72px; overflow: hidden; }
   .site-footer::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--brand-grad); }
   .grid { display: grid; gap: 40px; grid-template-columns: 1fr; }
+  .brand-col { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
   .brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; text-decoration: none; color: var(--on-deep); font-weight: 700; font-size: 1.1rem; }
   .brand img { width: 40px; height: auto; }
   .brand small { display: block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 400; letter-spacing: 0.12em; color: var(--on-deep-soft); }
-  .line { margin-top: 14px; font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; color: var(--on-deep); letter-spacing: 0.1em; }
+  /* 頁尾大字品牌收尾：品牌漸層字，隨視窗寬度縮放 */
+  .sig {
+    margin-top: clamp(48px, 7vw, 88px); white-space: nowrap; line-height: 1.05;
+    font-size: clamp(2.6rem, 7.6vw, 7.2rem); letter-spacing: 0.06em;
+    background: linear-gradient(120deg, rgba(79, 192, 225, 0.9), rgba(102, 194, 174, 0.55) 60%, rgba(102, 194, 174, 0.2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  @media (max-width: 560px) { .sig { white-space: normal; font-size: clamp(2.8rem, 16vw, 4.4rem); } }
   .li { display: inline-grid; place-items: center; width: 48px; height: 48px; margin-top: 16px; margin-left: -12px; border-radius: 50%; color: var(--on-deep); transition: background 0.2s; }
   .li:hover { background: rgba(255, 255, 255, 0.08); }
   .h { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.14em; color: var(--brand-cyan); margin-bottom: 10px; }

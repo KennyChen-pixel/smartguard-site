@@ -1,15 +1,22 @@
 ---
 import { richText } from '../lib/text';
-interface Props { eyebrow?: string; title: string; body?: string; align?: 'left' | 'center'; as?: 'h1' | 'h2' }
-const { eyebrow, title, body, align = 'left', as: Tag = 'h2' } = Astro.props;
+interface Props { eyebrow?: string; title: string; body?: string; align?: 'left' | 'center'; layout?: 'stack' | 'split'; as?: 'h1' | 'h2' }
+const { eyebrow, title, body, align = 'left', layout = 'stack', as: Tag = 'h2' } = Astro.props;
 ---
-<div class:list={['head', align]} data-reveal>
-  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-  <Tag class="h2">{title}</Tag>
+<div class:list={['head', align, layout]} data-reveal>
+  <div class="t">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <Tag class="h2">{title}</Tag>
+  </div>
   {body && <p class="lede" set:html={richText(body)} />}
   <slot />
 </div>
 <style>
   .head.center { text-align: center; display: flex; flex-direction: column; align-items: center; }
   .head.center .lede { margin-inline: auto; }
+  /* 分欄：標題在左、導言在右下對齊（桌機），製造版面節奏變化 */
+  @media (min-width: 960px) {
+    .head.split { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: end; }
+    .head.split .lede { margin-top: 0; max-width: 30em; justify-self: end; padding-bottom: 6px; }
+  }
 </style>

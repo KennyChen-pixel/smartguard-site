@@ -24,7 +24,7 @@ const teamPhoto = getImage(team.photo.image);
   <!-- 核心技術（深色） -->
   <section class="section on-deep tech">
     <div class="container">
-      <SectionHead eyebrow={home.techIntro.eyebrow} title={home.techIntro.title} body={home.techIntro.body} />
+      <SectionHead eyebrow={home.techIntro.eyebrow} title={home.techIntro.title} body={home.techIntro.body} layout="split" />
       <div class="feat-wrap">
         <FeatureGrid items={product.features} tone="deep" />
       </div>
@@ -76,7 +76,7 @@ const teamPhoto = getImage(team.photo.image);
         <a class="btn btn-link" href="/team">認識我們的團隊</a>
       </div>
       <figure class="photo" data-reveal style="--d:.15s">
-        <Image src={teamPhoto} alt={team.photo.alt} widths={[480, 720, 960]} sizes="(max-width: 900px) 92vw, 520px" />
+        <div class="ph"><Image class="settle" src={teamPhoto} alt={team.photo.alt} widths={[480, 720, 960]} sizes="(max-width: 900px) 92vw, 520px" /></div>
         <figcaption>{team.photo.caption}</figcaption>
       </figure>
     </div>
@@ -106,6 +106,7 @@ const teamPhoto = getImage(team.photo.image);
   blockquote { margin: 28px 0 18px; padding-left: 20px; border-left: 3px solid; border-image: var(--brand-grad) 1; }
   blockquote p { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.15rem, 1.8vw, 1.4rem); line-height: 1.8; color: var(--ink); }
   .photo { background: var(--surface); padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-soft); border: 1px solid var(--line); }
-  .photo :global(img) { border-radius: 12px; width: 100%; }
+  .ph { border-radius: 12px; overflow: hidden; }
+  .photo :global(img) { width: 100%; }
   .photo figcaption { padding: 12px 6px 4px; font-size: 0.88rem; line-height: 1.7; }
 </style>

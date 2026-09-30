@@ -44,7 +44,7 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
 
   <section class="section on-deep features-sec">
     <div class="container">
-      <SectionHead eyebrow={home.techIntro.eyebrow} title={home.techIntro.title} body={home.techIntro.body} />
+      <SectionHead eyebrow={home.techIntro.eyebrow} title={home.techIntro.title} body={home.techIntro.body} layout="split" />
       <div class="gap"><FeatureGrid items={product.features} tone="deep" /></div>
     </div>
   </section>
