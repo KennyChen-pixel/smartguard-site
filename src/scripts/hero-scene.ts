@@ -33,6 +33,7 @@ export function initHeroScene(root: HTMLElement) {
   const BOX = { half: 0.85, depth: 0.16, h: 0.22 };
 
   let W = 0, H = 0, DPR = 1, F = 0, HZ = 0, CX = 0, XS = 1;
+  let shoeW = 200, gW = 0, hudText = '';   // 快取：避免每格讀取版面或重寫 DOM
   const cam = { x: 0, y: 0 }, camT = { x: 0, y: 0 };
 
   const traveled = (t: number) =>
@@ -49,6 +50,7 @@ export function initHeroScene(root: HTMLElement) {
     XS = narrow ? 0.42 : 1;
     fitScene(narrow);
     const gw = gc.clientWidth, gh = gc.clientHeight;
+    gW = gw;
     gc.width = Math.round(gw * DPR); gc.height = Math.round(gh * DPR);
     gx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
@@ -58,23 +60,37 @@ export function initHeroScene(root: HTMLElement) {
         保證提示卡不壓到文字、鞋子與波形不被切掉。 */
   const copyEl = root.querySelector<HTMLElement>('[data-copy]');
   const stripEl = root.querySelector<HTMLElement>('[data-strip]');
+  const stageEl = root.querySelector<HTMLElement>('[data-stage]')!;
+  const stackedMQ = matchMedia('(max-width: 767px)');   // 手機：場景為按鈕下方的獨立區塊
   // 投影係數：感測點（高 0.1，距 2.2）與偵測當下門檻頂（高 0.22，距 S.z+DET·√½）
   const K_SENSOR = (CAM_H - 0.1) / S.z;
   const K_OBST = (CAM_H - 0.22) / (S.z + (DET) * Math.SQRT1_2);
   function fitScene(narrow: boolean) {
+    if (stackedMQ.matches) {
+      // 手機：場景區塊自成一格（不與文字重疊），只需讓鞋子、門檻、提示卡完整落在區塊內
+      const sw = Math.round(Math.max(160, Math.min(W * 0.5, H * 0.62, 240)));
+      shoe.style.width = `${sw}px`; shoeW = sw;
+      CX = Math.max(W * 0.32, sw * 352 / 554 + 12);
+      const below = sw * (248 - 88) / 554;
+      const sensorY = H - below - 6;
+      const fMax = (sensorY - 8 - 70) / (K_SENSOR - K_OBST);
+      F = Math.max(H * 0.3, Math.min(W * 1.45, fMax));   // 盡量放大填滿場景區塊（提示卡仍保留在區塊內）
+      HZ = sensorY - K_SENSOR * F;
+      return;
+    }
     const stripH = stripEl?.offsetHeight ?? 90;
-    const sw = narrow
+    const sw = Math.round(narrow
       ? Math.max(170, Math.min(W * 0.55, H * 0.27, W < 600 ? 240 : 320))
-      : Math.max(190, Math.min(W * 0.25, H * 0.36, 390));
-    shoe.style.width = `${Math.round(sw)}px`;
+      : Math.max(190, Math.min(W * 0.25, H * 0.36, 390)));
+    shoe.style.width = `${sw}px`; shoeW = sw;
     // 場景中心：確保鞋子左緣（感測點左側約 0.64 個鞋寬）不超出畫面
     CX = Math.max(W * (narrow ? 0.34 : 0.4), sw * 352 / 554 + (narrow ? 12 : 24));
     const below = sw * (248 - 88) / 554;               // 感測點以下的鞋身高度
     const sensorY = H - stripH - below + (narrow ? 4 : 10);
-    const heroTop = root.getBoundingClientRect().top;
-    const copyBottom = copyEl ? copyEl.getBoundingClientRect().bottom - heroTop : H * 0.5;
+    const stageTop = stageEl.getBoundingClientRect().top;
+    const copyBottom = copyEl ? copyEl.getBoundingClientRect().bottom - stageTop : H * 0.5;
     const hudSpace = narrow ? 74 : 96;                  // 提示卡＋連接線＋間距
-    const topLimit = narrow ? copyBottom + 10 : 92;     // 手機：文字下方；桌機：導覽列下方（門檻在右側，不與文字重疊）
+    const topLimit = narrow ? copyBottom + 10 : 92;     // 平板：文字下方；桌機：導覽列下方（門檻在右側，不與文字重疊）
     const fMax = (sensorY - topLimit - hudSpace) / (K_SENSOR - K_OBST);
     const fPref = H * (narrow ? 0.85 : 0.9);       // 空間足夠時（平板）場景放大填滿，不留大片空白
     F = Math.max(H * (narrow ? 0.3 : 0.45), Math.min(fPref, fMax));
@@ -114,31 +130,58 @@ export function initHeroScene(root: HTMLElement) {
   // ── 地面點陣（被波前照亮）──
   let GRID = 0.42;
   const COS_CONE = Math.cos(HALF + 0.12);
+  /* 效能：同一排（同深度）的點顏色、大小、畫面高度都相同 → 一排只 fill 一次；
+     每排直接解出畫面內的 x 範圍，不計算畫面外的點；被照亮的點依亮度分 10 組合併繪製。
+     （原本每點各 beginPath/fill，手機 CPU 4x 降速時每格 30～60ms。） */
+  const LIT_BUCKETS = 10;
+  const litPaths: number[][] = Array.from({ length: LIT_BUCKETS }, () => []);
   function drawFloor(s: number, waves: Wave[]) {
     const ox = ((-(FWD.x * s)) % GRID + GRID) % GRID;
     const oz = ((-(FWD.z * s)) % GRID + GRID) % GRID;
     const fronts = waves.filter((w) => w.r > 0);
+    for (const b of litPaths) b.length = 0;
     for (let z = 1.1 + oz; z < 19; z += GRID) {
+      const k = F / z;
+      const qy = HZ + cam.y + CAM_H * k;
+      if (qy > H + 4) continue;
       const depth = Math.max(0, 1 - (z - 1.1) / 17);
-      for (let x = -12 + ox; x < 26; x += GRID) {
-        const q = P(x, 0, z);
-        if (q.y > H + 4 || q.x < -8 || q.x > W + 8) continue;
+      const base = 0.07 + 0.2 * depth;
+      const r0 = Math.max(0.55, k * 0.011);
+      // 本排在畫面內的世界 x 範圍
+      const xLo = ((-8 - CX) / k + cam.x) / XS, xHi = ((W + 8 - CX) / k + cam.x) / XS;
+      const xStart = -12 + ox + Math.max(0, Math.ceil((xLo - (-12 + ox)) / GRID)) * GRID;
+      const xEnd = Math.min(26, xHi);
+      ctx.fillStyle = `rgba(16,108,128,${base.toFixed(3)})`;
+      ctx.beginPath();
+      for (let x = xStart; x < xEnd; x += GRID) {
+        const qx = CX + (x * XS - cam.x) * k;
         let lit = 0;
         if (fronts.length) {
-          const dx = x - S.x, dz = z - S.z, d = Math.hypot(dx, dz);
+          const dx = x - S.x, dz = z - S.z, d = Math.sqrt(dx * dx + dz * dz);
           const cos = d > 0 ? (dx * FWD.x + dz * FWD.z) / d : 0;
           if (cos > COS_CONE) {
             const edge = Math.min(1, (cos - COS_CONE) / 0.08);
-            for (const w of fronts) lit += Math.exp(-((d - w.r) ** 2) / 0.03) * w.fade * edge;
+            for (const w of fronts) { const e = d - w.r; if (e > -0.6 && e < 0.6) lit += Math.exp(-(e * e) / 0.03) * w.fade * edge; }
           }
         }
-        const base = 0.07 + 0.2 * depth;
-        const r = Math.max(0.55, q.s * 0.011 + lit * 1.3);
-        ctx.fillStyle = lit > 0.05
-          ? `rgba(79,192,225,${Math.min(1, base + lit * 0.8)})`
-          : `rgba(16,108,128,${base})`;
-        ctx.beginPath(); ctx.arc(q.x, q.y, r, 0, 6.2832); ctx.fill();
+        if (lit > 0.05) {
+          const a = Math.min(1, base + lit * 0.8);
+          litPaths[Math.min(LIT_BUCKETS - 1, Math.floor(a * LIT_BUCKETS))].push(qx, qy, Math.max(0.55, r0 + lit * 1.3));
+        } else if (r0 < 1.2) {
+          ctx.rect(qx - r0, qy - r0, r0 * 2, r0 * 2);   // 小點用方形，比圓弧快很多，肉眼無差
+        } else {
+          ctx.moveTo(qx + r0, qy); ctx.arc(qx, qy, r0, 0, 6.2832);
+        }
       }
+      ctx.fill();
+    }
+    for (let i = 0; i < LIT_BUCKETS; i++) {
+      const b = litPaths[i];
+      if (!b.length) continue;
+      ctx.fillStyle = `rgba(79,192,225,${((i + 0.5) / LIT_BUCKETS).toFixed(2)})`;
+      ctx.beginPath();
+      for (let j = 0; j < b.length; j += 3) { ctx.moveTo(b[j] + b[j + 2], b[j + 1]); ctx.arc(b[j], b[j + 1], b[j + 2], 0, 6.2832); }
+      ctx.fill();
     }
   }
 
@@ -389,8 +432,8 @@ export function initHeroScene(root: HTMLElement) {
     const top = drawObstacle(du, alpha, state, since);
     const sq = drawWaves(du, waves, state, total, alpha);
 
-    // 鞋子對位：感測模組在示意圖中約位於 (352, 88)／(554, 248)
-    const sw = shoe.clientWidth, sh = sw * 248 / 554;
+    // 鞋子對位：感測模組在示意圖中約位於 (352, 88)／(554, 248)（寬度取自 fitScene 快取，避免每格讀取版面）
+    const sw = shoeW, sh = sw * 248 / 554;
     shoe.style.transform = `translate3d(${sq.x - sw * 352 / 554}px, ${sq.y - sh * 88 / 248}px, 0)`;
 
     // 震動預警（偵測後 1.3 秒）
@@ -405,32 +448,56 @@ export function initHeroScene(root: HTMLElement) {
     hud.classList.toggle('on', showHud);
     hud.classList.toggle('safe', safe);
     hud.style.transform = `translate3d(${top.x}px, ${top.y - 18}px, 0) translate(-50%, -100%)`;
-    hudTitle.textContent = safe ? '已於跌倒前預警' : '偵測到前方障礙物';
+    const title = safe ? '已於跌倒前預警' : '偵測到前方障礙物';
+    if (title !== hudText) { hudTitle.textContent = title; hudText = title; }   // 只在改變時寫入，避免每格重排
 
     drawGait(total, since, detected, safe, alpha);
     if (!still && running) raf = requestAnimationFrame(frame);
   }
 
   resize();
-  const kick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); };
-  addEventListener('resize', () => { resize(); kick(); });
+  const kick = () => { cancelAnimationFrame(raf); if (running || still) raf = requestAnimationFrame(frame); };
+  // 手機上下滑動時網址列伸縮會觸發 resize：只有畫布實際尺寸改變才重新配置（避免回拉卡頓）
+  let resizeQueued = false;
+  addEventListener('resize', () => {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    requestAnimationFrame(() => {
+      resizeQueued = false;
+      if (cv.clientWidth !== W || cv.clientHeight !== H || gc.clientWidth !== gW) { resize(); kick(); }
+    });
+  }, { passive: true });
   // 文字區高度變化（字體載入、換行）時重新計算場景位置
   if (copyEl && 'ResizeObserver' in window) {
     let last = 0;
     new ResizeObserver(() => { const h = copyEl.offsetHeight; if (h !== last) { last = h; resize(); kick(); } }).observe(copyEl);
   }
   if (!still) {
-    // 游標視差 ＋ 捲動景深：往下捲時地面緩緩後退（地平線上移）
-    let pointerY = 0;
-    const updateCamY = () => { camT.y = pointerY - Math.min(scrollY, H) * 0.12; };
-    addEventListener('pointermove', (e) => {
-      camT.x = (e.clientX / innerWidth - 0.5) * -0.5;
-      pointerY = (e.clientY / innerHeight - 0.5) * -16;
-      updateCamY();
-    }, { passive: true });
-    addEventListener('scroll', updateCamY, { passive: true });
-    new IntersectionObserver(([e]) => { running = e.isIntersecting; if (running) kick(); }).observe(root);
-    document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) kick(); });
+    // 游標視差 ＋ 捲動景深（只在有滑鼠的裝置；觸控裝置不監聽捲動，維持原生捲動零負擔）
+    const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (finePointer) {
+      let pointerY = 0;
+      const updateCamY = () => { camT.y = pointerY - Math.min(scrollY, H) * 0.12; };
+      addEventListener('pointermove', (e) => {
+        camT.x = (e.clientX / innerWidth - 0.5) * -0.5;
+        pointerY = (e.clientY / innerHeight - 0.5) * -16;
+        updateCamY();
+      }, { passive: true });
+      addEventListener('scroll', updateCamY, { passive: true });
+    }
+    // 畫面外暫停：場景與步態波形都離開畫面才停；分頁隱藏也停
+    const seen = new Set<Element>();
+    const update = () => {
+      const next = seen.size > 0 && !document.hidden;
+      if (next !== running) { running = next; if (running) kick(); else cancelAnimationFrame(raf); }
+    };
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.isIntersecting ? seen.add(e.target) : seen.delete(e.target);
+      update();
+    });
+    io.observe(stageEl);
+    if (stripEl) io.observe(stripEl);
+    document.addEventListener('visibilitychange', update);
   }
   if (document.fonts?.ready) document.fonts.ready.then(() => { resize(); kick(); });
   kick();

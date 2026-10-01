@@ -82,13 +82,20 @@ html { scrollbar-color: rgba(13, 106, 134, 0.45) transparent; }
   font-family: var(--font-mono); font-size: var(--fs-eyebrow); font-weight: 500;
   letter-spacing: 0.14em; color: var(--cyan-ink); text-transform: uppercase;
 }
+/* 眉標圓點的呼吸：只用 transform／opacity（交給 GPU 合成，不觸發重繪；原本 box-shadow 動畫每格重繪） */
 .eyebrow::before {
-  content: ""; width: 8px; height: 8px; border-radius: 50%;
-  background: var(--brand-mint); box-shadow: 0 0 0 0 rgba(102, 194, 174, 0.6);
-  animation: sg-pulse 2.6s infinite;
+  content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--brand-mint);
+  animation: sg-pulse 2.6s ease-in-out infinite;
 }
 .on-deep .eyebrow { color: var(--brand-cyan); }
-@keyframes sg-pulse { 70% { box-shadow: 0 0 0 10px rgba(102, 194, 174, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 194, 174, 0); } }
+@keyframes sg-pulse { 50% { transform: scale(1.45); opacity: 0.55; } }
+
+/* 手機／觸控裝置效能：取消毛玻璃（backdrop-filter）與大範圍濾鏡，改用不透明底色 */
+@media (max-width: 767px), (pointer: coarse) {
+  .btn.btn-ghost { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(255, 255, 255, 0.92); }
+  .on-deep .btn.btn-ghost { background: transparent; }
+}
 
 .display { font-family: var(--font-display); font-weight: 900; letter-spacing: 0.02em; line-height: var(--lh-display); }
 .h2 { font-family: var(--font-display); font-weight: 900; font-size: var(--fs-h2); letter-spacing: 0.02em; line-height: var(--lh-heading); margin-top: var(--space-eyebrow); }

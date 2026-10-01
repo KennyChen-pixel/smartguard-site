@@ -53,13 +53,22 @@ const items = limit ? news.items.slice(0, limit) : news.items;
 <script>
   // 時間軸隨捲動填色
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
+  // 只在時間軸接近畫面時監聽捲動，並以 rAF 節流（每格最多計算一次）
   document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((tl) => {
+    if (reduce) { tl.style.setProperty('--p', '1'); return; }
+    let queued = false, max = 0;
     const update = () => {
+      queued = false;
       const r = tl.getBoundingClientRect();
-      const p = reduce ? 1 : Math.min(1, Math.max(0, (innerHeight * 0.75 - r.top) / r.height));
-      tl.style.setProperty('--p', String(p));
+      const p = Math.min(1, Math.max(0, (innerHeight * 0.75 - r.top) / r.height));
+      if (p > max + 0.002) { max = p; tl.style.setProperty('--p', p.toFixed(3)); }   // 只增不減：往回捲不重播
+      if (max >= 0.999) { removeEventListener('scroll', onScroll); io.disconnect(); }
     };
-    addEventListener('scroll', update, { passive: true });
-    update();
+    const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { addEventListener('scroll', onScroll, { passive: true }); onScroll(); }
+      else removeEventListener('scroll', onScroll);
+    }, { rootMargin: '200px 0px' });
+    io.observe(tl);
   });
 </script>

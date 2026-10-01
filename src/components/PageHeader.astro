@@ -33,4 +33,5 @@ const { eyebrow, title, body } = Astro.props;
   }
   @keyframes sg-run { 0% { stroke-dashoffset: 26; opacity: 1; } 96% { opacity: 1; } 100% { stroke-dashoffset: -1000; opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .pulse { display: none; } }
+  @media (max-width: 767px), (pointer: coarse) { .pulse { filter: none; } }
 </style>

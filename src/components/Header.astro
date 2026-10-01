@@ -48,13 +48,22 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
     .progress { animation: sg-progress linear both; animation-timeline: scroll(root); }
   }
   @keyframes sg-progress { to { transform: scaleX(1); } }
-  .bar { transition: height 0.35s var(--ease-out); }
-  .scrolled .bar { height: 64px; }
+  /* 捲動後收窄：只在桌機的浮動頁首（首頁）啟用；內頁頁首在排版流中，改高度會讓整頁重排 */
+  @media (min-width: 768px) and (pointer: fine) {
+    .overlay .bar { transition: height 0.35s var(--ease-out); }
+    .overlay.scrolled .bar { height: 64px; }
+  }
   .site-header.overlay { position: fixed; left: 0; right: 0; }
   .site-header.scrolled, .site-header:not(.overlay), .site-header.open {
     background: rgba(244, 248, 247, 0.86);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 1px 0 var(--line);
+  }
+  /* 手機／觸控：頁首不用毛玻璃（捲動時每格都要重新模糊背景），改用接近不透明的底色 */
+  @media (max-width: 767px), (pointer: coarse) {
+    .site-header.scrolled, .site-header:not(.overlay), .site-header.open {
+      background: rgba(244, 248, 247, 0.97); backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
   }
   .bar { display: flex; align-items: center; justify-content: space-between; height: 76px; }
   .brand { display: flex; align-items: center; gap: 12px; min-height: 48px; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.04em; }
@@ -110,7 +119,9 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
   };
   btn.addEventListener('click', () => setOpen(menu.hasAttribute('hidden')));
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hasAttribute('hidden')) { setOpen(false); btn.focus(); } });
-  const onScroll = () => header.classList.toggle('scrolled', scrollY > 24);
+  // 只在跨過門檻時才改 class（捲動事件中不做任何版面讀取或重計算）
+  let scrolled: boolean | null = null;
+  const onScroll = () => { const s = scrollY > 24; if (s !== scrolled) { scrolled = s; header.classList.toggle('scrolled', s); } };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 </script>

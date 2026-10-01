@@ -89,6 +89,11 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
   .scan { position: absolute; inset: 14%; border-radius: 50%; background: conic-gradient(from 0deg, rgba(79, 192, 225, 0.22), transparent 25%); animation: sg-spin 5s linear infinite; -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 72%); mask-image: radial-gradient(circle, #000 55%, transparent 72%); }
   .stage :global(.device) { position: relative; width: 74%; height: auto; filter: drop-shadow(0 30px 30px rgba(12, 46, 54, 0.28)); animation: sg-float 6s ease-in-out infinite; }
   @keyframes sg-float { 50% { transform: translateY(-12px); } }
+  /* 手機／觸控：移除持續動畫元素上的濾鏡與毛玻璃（每格都要重新計算） */
+  @media (max-width: 767px), (pointer: coarse) {
+    .stage :global(.device) { filter: none; }
+    .hotspot .chip { backdrop-filter: none; background: #fff; }
+  }
   .beam { position: absolute; left: 50%; top: 36%; width: 0; height: 0; }
   .beam i { position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(79, 192, 225, 0.8); animation: sg-ping 2.4s var(--ease-out) infinite; opacity: 0; }
   .beam i:nth-child(2) { animation-delay: 0.8s; }

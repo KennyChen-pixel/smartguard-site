@@ -53,14 +53,24 @@
 <script>
   // 減少動態或截圖模式（網址帶 ?t=）：直接呈現完成狀態
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
+  // 只在圖表接近畫面時監聽捲動，rAF 節流；畫完（p=1）後不再更新，往回捲也不重播
   document.querySelectorAll<HTMLElement>('[data-chart]').forEach((el) => {
+    const set = (p: number) => { el.style.setProperty('--p', p.toFixed(3)); el.style.setProperty('--e', p > 0.56 ? '1' : '0'); };
+    if (reduce) { set(1); return; }
+    let queued = false, max = 0;
     const update = () => {
+      queued = false;
       const r = el.getBoundingClientRect();
-      const p = reduce ? 1 : Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height * 0.9)));
-      el.style.setProperty('--p', p.toFixed(3));
-      el.style.setProperty('--e', p > 0.56 ? '1' : '0');
+      const p = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height * 0.9)));
+      if (p > max + 0.002) { max = p; set(p); }
+      if (max >= 1) { removeEventListener('scroll', onScroll); io.disconnect(); }
     };
-    addEventListener('scroll', update, { passive: true });
-    update();
+    const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { addEventListener('scroll', onScroll, { passive: true }); onScroll(); }
+      else removeEventListener('scroll', onScroll);
+    }, { rootMargin: '200px 0px' });
+    set(0);
+    io.observe(el);
   });
 </script>
