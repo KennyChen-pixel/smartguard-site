@@ -21,7 +21,9 @@ const faqLd = faq.length
       })),
     }
   : null;
-const canonical = new URL(Astro.url.pathname === '/index' ? '/' : Astro.url.pathname, site.url).href;
+// 建置時的路徑是檔案名（/product.html、/index.html），Vercel 實際提供乾淨網址（/product、/）→ 正規化
+const cleanPath = Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '/').replace(/^$/, '/');
+const canonical = new URL(cleanPath, site.url).href;
 const ogImage = new URL(image, site.url).href;
 
 const organization = {
