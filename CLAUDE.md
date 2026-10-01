@@ -88,6 +88,14 @@ npm run preview      # 預覽建置結果
 - 數據要有出處（例：92% 來源為「高雄市鼓山區日照中心訪談」）
 - 產品名稱固定：「SmartGuard 智慧主動式防跌偵測系統」
 
+## 🔒 網址與 Search Console 驗證（任何改版都不可更動）
+
+- 正式網址固定為 `https://smartguard-site.vercel.app`，與 Google Search Console 資源一致（已驗證，含 2026/6/29 起的成效資料）。
+- 各頁網址固定：`/`、`/product`、`/technology`、`/team`、`/news`、`/contact`。不可改名、不可加 `.html` 或結尾斜線。
+- **驗證檔 `public/google76491f48d04be451.html` 絕對不可刪除、改名或修改內容**，且必須能以原網址直接回應 200（不可被轉址）。
+- 因此 `vercel.json` 維持 `"cleanUrls": false`、`astro.config.mjs` 維持 `build.format: 'directory'`；開啟 cleanUrls 會讓驗證檔被 308 轉址，可能導致 Search Console 驗證失效。
+- sitemap：`/sitemap-index.xml`（建置自動產生）；`/sitemap.xml` 為相容舊網址的索引檔；`robots.txt` 指向 sitemap-index.xml。
+
 ## 不要隨意修改的檔案（設計系統與核心元件）
 
 改網站內容時，**不需要也不應該**動這些檔案；如需改版請先與負責人確認：
@@ -96,7 +104,8 @@ npm run preview      # 預覽建置結果
 - `src/layouts/BaseLayout.astro`、`src/components/Seo.astro`（SEO、結構化資料）
 - `src/components/Hero.astro`、`src/scripts/hero-scene.ts`（首頁主視覺：聲波感測動畫與心電圖）
 - `src/components/Header.astro`、`Footer.astro`、`Icon.astro`
-- `astro.config.mjs`、`vercel.json`
+- `astro.config.mjs`、`vercel.json`（網址與驗證相關，見上方 🔒 區塊）
+- `public/google76491f48d04be451.html`（Search Console 驗證檔）
 - `legacy/`：舊版 React 網站備份，不參與建置
 
 ## 安全規則
