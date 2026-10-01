@@ -1,8 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "astro",
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/product.html", "destination": "/product", "permanent": true },
+    { "source": "/technology.html", "destination": "/technology", "permanent": true },
+    { "source": "/team.html", "destination": "/team", "permanent": true },
+    { "source": "/news.html", "destination": "/news", "permanent": true },
+    { "source": "/contact.html", "destination": "/contact", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/_astro/(.*)",
