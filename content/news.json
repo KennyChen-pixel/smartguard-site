@@ -7,13 +7,13 @@
   "items": [
     {
       "date": "2026/08/05-08/06",
-      "title": "智感先鋒科技將參展 2026 第二屆 BIOMED-X 生醫新創媒合博覽會，歡迎蒞臨交流",
+      "title": "智感先鋒科技參展 2026 第二屆 BIOMED-X 生醫新創媒合博覽會",
       "icon": "Radio",
       "url": "https://www.biomed-x.com.tw/"
     },
     {
-      "date": "2026",
-      "title": "智感先鋒科技將於 6/25-27 Medical Taiwan 2026 展出主動式防跌系統",
+      "date": "2026/06/25-06/27",
+      "title": "智感先鋒科技於 Medical Taiwan 2026 台灣國際醫療暨健康照護展展出主動式防跌系統",
       "icon": "Radio",
       "url": "https://www.medicaltaiwan.com.tw/zh-tw/menu/7EB43B97FCB8AED7D0636733C6861689/info.html"
     },
@@ -21,7 +21,8 @@
       "date": "2026",
       "title": "中山大學攜智感先鋒科技亮相 Medical Taiwan 2026，智慧防跌系統獲實測肯定",
       "icon": "Award",
-      "url": "https://www.medicaltaiwan.com.tw/zh-tw/news/80BFA2BD900FC425/info.html"
+      "url": "",
+      "_待補": "TODO：原連結 https://www.medicaltaiwan.com.tw/zh-tw/news/80BFA2BD900FC425/info.html 已失效（404），暫時移除；有新網址再填回 url。"
     },
     {
       "date": "2026",

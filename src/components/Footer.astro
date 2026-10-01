@@ -36,7 +36,8 @@ const year = new Date().getFullYear();
     <p class="sig display">{site.brandLine}</p>
   </div>
   <div class="container legal">
-    <p>© {year} {site.name} {site.nameEn}. All rights reserved.</p>
+    <p class="disc">{site.disclaimer}</p>
+    <p>© {year} {site.legalName} {site.nameEn}. All rights reserved.</p>
   </div>
 </footer>
 
@@ -66,5 +67,6 @@ const year = new Date().getFullYear();
   .contact li :global(.icon) { flex: none; color: var(--brand-mint); }
   .contact span { padding: 8px 0; }
   .legal { margin-top: 56px; padding-block: 24px; border-top: 1px solid rgba(234, 245, 244, 0.12); font-size: 0.85rem; }
+  .legal .disc { margin-bottom: 10px; max-width: 60em; line-height: 1.8; }
   @media (min-width: 768px) { .grid { grid-template-columns: 1.4fr 1fr 1.4fr; } }
 </style>

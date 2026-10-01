@@ -64,6 +64,7 @@ const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
           </div>
           <button class="btn btn-primary submit" type="submit"><Icon name="Send" /><span data-submit-label>送出諮詢</span></button>
           <p class="form-err" role="alert" data-form-err></p>
+          <p class="privacy">您填寫的資料僅用於回覆本次諮詢。</p>
         </form>
 
         <div class="done" data-done hidden tabindex="-1">
@@ -106,6 +107,7 @@ const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
   .submit[disabled] { opacity: 0.6; cursor: progress; }
   .form-err { margin-top: 14px; color: #b42318; font-weight: 500; }
   .form-err:empty { display: none; }
+  .privacy { margin-top: 14px; font-size: 0.85rem; color: var(--ink-soft); text-align: center; }
   .done { text-align: center; padding: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .done[hidden] { display: none; }
   .ok { color: var(--mint-ink); }
