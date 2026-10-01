@@ -315,8 +315,7 @@ export function initHeroScene(root: HTMLElement) {
   // ── 步態訊號：頻率固定、振幅不規則 ──
   const hash = (n: number) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const PERIOD = 88;
-  let marks: number[] = [];
-  let lastCycle = -1;
+  const GAIT_SPEED = 64;   // 波形捲動速度（px／秒）；偵測標記以同速移動，與主動畫同一時間軸
   function stepShape(u: number, i: number, damp: number) {
     const a1 = (0.62 + 0.38 * hash(i)) * damp;
     const a2 = (0.28 + 0.22 * hash(i + 17)) * damp;
@@ -327,24 +326,27 @@ export function initHeroScene(root: HTMLElement) {
     else if (u > 0.46 && u < 0.56) y = -Math.sin(((u - 0.46) / 0.1) * Math.PI) * 0.12 * (0.5 + hash(i + 5));
     return y + (hash(i * 7 + Math.floor(u * 40)) - 0.5) * 0.04;
   }
-  function drawGait(t: number, cycleIndex: number, detected: boolean) {
+  // 偵測標記與主動畫同步：位置直接由「偵測後經過的秒數」算出——
+  // 偵測當下出現在最右端（＝現在），之後與波形同速往左；只顯示本輪的標記，門檻淡出時一起淡出。
+  function drawGait(total: number, since: number, detected: boolean, safe: boolean, alpha: number) {
     const gw = gc.clientWidth, gh = gc.clientHeight;
     gx.clearRect(0, 0, gw, gh);
     const mid = gh * 0.56;
-    const v = t * 64 + cycleIndex * CYCLE * 64;
-    if (detected && cycleIndex !== lastCycle && !still) { marks.push(v); lastCycle = cycleIndex; }
-    if (still && !marks.length) marks = [v - gw * 0.18];
-    marks = marks.filter((m) => gw - (v - m) > -40);
+    const v = total * GAIT_SPEED;
+    const markX = detected ? gw - 3 - since * GAIT_SPEED : Infinity;
 
     gx.strokeStyle = 'rgba(18,38,45,.1)'; gx.lineWidth = 1;
     gx.beginPath(); gx.moveTo(0, mid); gx.lineTo(gw, mid); gx.stroke();
-    for (const m of marks) {
-      const x = gw - (v - m);
-      const band = gx.createLinearGradient(x - 26, 0, x + 26, 0);
-      band.addColorStop(0, 'rgba(102,194,174,0)'); band.addColorStop(0.5, 'rgba(102,194,174,.22)'); band.addColorStop(1, 'rgba(102,194,174,0)');
-      gx.fillStyle = band; gx.fillRect(x - 26, 0, 52, gh);
+    if (detected && markX > -30) {
+      gx.save();
+      gx.globalAlpha = alpha;
+      const col = safe ? '102,194,174' : '224,138,30';
+      const band = gx.createLinearGradient(markX - 26, 0, markX + 26, 0);
+      band.addColorStop(0, `rgba(${col},0)`); band.addColorStop(0.5, `rgba(${col},.22)`); band.addColorStop(1, `rgba(${col},0)`);
+      gx.fillStyle = band; gx.fillRect(markX - 26, 0, 52, gh);
       gx.strokeStyle = '#e08a1e'; gx.lineWidth = 1.6;
-      gx.beginPath(); gx.moveTo(x, 3); gx.lineTo(x, gh - 3); gx.stroke();
+      gx.beginPath(); gx.moveTo(markX, 3); gx.lineTo(markX, gh - 3); gx.stroke();
+      gx.restore();
     }
     const grad = gx.createLinearGradient(0, 0, gw, 0);
     grad.addColorStop(0, 'rgba(79,192,225,0)'); grad.addColorStop(0.15, 'rgba(79,192,225,.9)'); grad.addColorStop(1, 'rgba(102,194,174,1)');
@@ -353,13 +355,13 @@ export function initHeroScene(root: HTMLElement) {
     for (let x = 0; x <= gw; x += 1.25) {
       const w = (x + v) / PERIOD;
       const i = Math.floor(w);
-      const recentSlow = marks.some((m) => { const mx = gw - (v - m); return x > mx && x - mx < 260; });
-      const y = mid + stepShape(w - i, i, recentSlow ? 0.62 : 1) * gh * 0.44;
+      const slowed = x > markX;                       // 預警之後的步伐：放慢、振幅變小
+      const y = mid + stepShape(w - i, i, slowed ? 0.62 : 1) * gh * 0.44;
       x ? gx.lineTo(x, y) : gx.moveTo(x, y);
     }
     gx.stroke();
     const w = (gw + v) / PERIOD, i = Math.floor(w);
-    const ye = mid + stepShape(w - i, i, 1) * gh * 0.44;
+    const ye = mid + stepShape(w - i, i, detected ? 0.62 : 1) * gh * 0.44;
     gx.fillStyle = '#66c2ae'; gx.beginPath(); gx.arc(gw - 3, ye, 3.6, 0, 6.2832); gx.fill();
   }
 
@@ -405,7 +407,7 @@ export function initHeroScene(root: HTMLElement) {
     hud.style.transform = `translate3d(${top.x}px, ${top.y - 18}px, 0) translate(-50%, -100%)`;
     hudTitle.textContent = safe ? '已於跌倒前預警' : '偵測到前方障礙物';
 
-    drawGait(total, cycleIndex, detected);
+    drawGait(total, since, detected, safe, alpha);
     if (!still && running) raf = requestAnimationFrame(frame);
   }
 
