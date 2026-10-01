@@ -1,0 +1,227 @@
+---
+import { Image } from 'astro:assets';
+import home from '../../content/home.json';
+import Icon from './Icon.astro';
+import shoeImg from '../assets/images/product-render-2.png';
+const h = home.hero;
+---
+<section class="hero" data-hero aria-labelledby="hero-title">
+  <div class="veil" aria-hidden="true"></div>
+
+  <div class="copy container" data-copy>
+    <p class="eyebrow">{h.eyebrow}</p>
+    <h1 id="hero-title" class="display" data-split>{h.title}</h1>
+    <p class="sub">{h.subtitle}</p>
+    <p class="lede">{h.lede}</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href={h.ctaPrimary.href}>{h.ctaPrimary.label}<Icon name="ArrowRight" /></a>
+      <a class="btn btn-ghost" href={h.ctaSecondary.href}>{h.ctaSecondary.label}</a>
+    </div>
+  </div>
+
+  <!-- 感測場景：桌機鋪滿首屏背景；手機（≤767px）改為按鈕下方的獨立區塊，不與文字重疊 -->
+  <div class="stage" data-stage>
+    <canvas class="floor" data-floor aria-hidden="true"></canvas>
+    <Image
+      class="shoe"
+      data-shoe
+      src={shoeImg}
+      alt="SmartGuard 智慧主動式防跌偵測系統示意圖：拖鞋鞋面搭載距離感測模組"
+      widths={[280, 420, 560]}
+      sizes="(max-width: 767px) 200px, 26vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="vib" data-vib aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="hud" data-hud aria-hidden="true">
+      <div class="card">
+        <p class="t"><i></i><span data-hud-title>偵測到前方障礙物</span></p>
+      </div>
+      <span class="stem"></span>
+    </div>
+  </div>
+
+  <div class="strip" data-strip aria-hidden="true">
+    <p class="lbl"><b>步態訊號</b>GAIT SIGNAL</p>
+    <canvas data-gait></canvas>
+  </div>
+</section>
+
+<style>
+  /* 首屏高度＝可視高度扣掉「露出量」，讓下一區塊邊緣露出、暗示可往下捲。
+     100vh 為舊瀏覽器備援，100dvh／100svh 依序覆蓋（行動瀏覽器網址列收合時不跳動）。 */
+  .hero { position: relative; isolation: isolate; overflow: hidden; background: var(--paper); }
+  /* 依視窗高度自適應：只套用在 768px 以上（桌機／平板）；手機為一般垂直排列 */
+  @media (min-width: 768px) {
+    .hero {
+      --peek: clamp(16px, 3.2vh, 36px);
+      height: calc(100vh - var(--peek));
+      height: calc(100dvh - var(--peek));
+      height: calc(100svh - var(--peek));
+      min-height: 500px; max-height: 1100px;
+    }
+    .stage { position: absolute; inset: 0; }   /* 不設 z-index：子元素沿用首屏的圖層順序 */
+  }
+  /* 平面方格紙 → 往下淡出，交棒給 3D 點陣地面 */
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background-image:
+      linear-gradient(var(--paper-grid-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-grid-major) 1px, transparent 1px),
+      linear-gradient(var(--paper-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+    -webkit-mask-image: linear-gradient(#000 22%, transparent 56%);
+    mask-image: linear-gradient(#000 22%, transparent 56%);
+  }
+  /* 晨光與薄荷光暈 */
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(55vw 50vh at 90% 6%, var(--warm-glow), transparent 70%),
+      radial-gradient(45vw 45vh at 8% 100%, rgba(102, 194, 174, 0.16), transparent 70%),
+      radial-gradient(40vw 30vh at 75% 60%, rgba(79, 192, 225, 0.08), transparent 70%);
+  }
+  .floor { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .veil {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(90deg, rgba(244, 248, 247, 0.92) 0%, rgba(244, 248, 247, 0.7) 32%, rgba(244, 248, 247, 0) 56%);
+  }
+  .hero :global(.shoe) {
+    position: absolute; left: 0; top: 0; z-index: 2; width: clamp(200px, 25vw, 390px); height: auto;
+    mix-blend-mode: multiply; will-change: transform;
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 55%, #000 60%, transparent 100%);
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 55%, #000 60%, transparent 100%);
+  }
+  .hero :global(.shoe.shake) { animation: sg-shake 0.12s linear infinite; }
+  @keyframes sg-shake { 0%, 100% { translate: 0 0; } 25% { translate: 1.6px -0.6px; } 75% { translate: -1.6px 0.6px; } }
+
+  /* 震動預警波紋 */
+  .vib { position: absolute; left: 0; top: 0; z-index: 3; width: 0; height: 0; pointer-events: none; }
+  .vib i {
+    position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid rgba(224, 138, 30, 0.85); opacity: 0;
+  }
+  .vib.on i { animation: sg-ring 1s var(--ease-out) infinite; }
+  .vib.on i:nth-child(2) { animation-delay: 0.22s; }
+  .vib.on i:nth-child(3) { animation-delay: 0.44s; }
+  @keyframes sg-ring { 0% { transform: scale(0.4); opacity: 0.95; } 100% { transform: scale(2.4); opacity: 0; } }
+
+  .copy { position: relative; z-index: 4; padding-top: 104px; }
+  h1 {
+    font-size: var(--fs-h1); line-height: var(--lh-display); margin-top: var(--space-eyebrow); letter-spacing: 0.03em;
+  }
+  /* 桌機／橫向：字級與間距同時參考視窗寬度與高度（vw + vh），視窗變矮時一起收斂 */
+  @media (min-width: 821px) {
+    .copy { padding-top: clamp(84px, 9vh + 34px, 168px); }
+    h1 { font-size: clamp(2.5rem, 4.2vw + 2.2vh, 6rem); margin-top: clamp(10px, 1.8vh, 18px); }
+    .sub { font-size: clamp(1.15rem, 1.1vw + 1vh, 1.75rem); margin-top: clamp(8px, 1.6vh, 16px); }
+    .lede { font-size: clamp(1rem, 0.55vw + 0.9vh, 1.2rem); margin-top: clamp(10px, 2.2vh, 24px); }
+    .ctas { margin-top: clamp(16px, 3.8vh, 40px); }
+  }
+  /* 矮視窗（筆電 125% 縮放、瀏覽器工具列較多時）再收緊 */
+  @media (min-width: 821px) and (max-height: 800px) {
+    .lede { line-height: 1.75; }
+    .strip { height: 84px; }
+  }
+  @media (min-width: 821px) and (max-height: 700px) {
+    .copy { padding-top: 84px; }
+    .lede { max-width: 40em; }
+    .strip { height: 74px; }
+    .strip canvas { height: 48px; }
+    .hud .stem { height: 16px; }
+  }
+  @media (min-width: 900px) { h1 { white-space: nowrap; } }
+  h1 :global(.ch) { display: inline-block; }
+  h1 :global(.seg) { display: inline-block; white-space: nowrap; }
+  .js h1 :global(.ch) { opacity: 0; transform: translateY(0.3em); filter: blur(10px); animation: sg-rise 0.9s var(--ease-out) forwards; }
+  @keyframes sg-rise { to { opacity: 1; transform: none; filter: blur(0); } }
+  h1 :global(.comma) { color: var(--ink); }
+  h1 :global(.accent) {
+    background: linear-gradient(120deg, #0d6a86 0%, #1b6f5b 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { margin-top: 16px; line-height: 1.5; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.25rem, 2vw, 1.75rem); color: var(--cyan-ink); letter-spacing: 0.06em; }
+  .lede { color: var(--ink-soft); }
+  .ctas { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .js .sub, .js .lede, .js .ctas, .js .eyebrow { opacity: 0; animation: sg-fade 0.9s var(--ease-out) forwards; }
+  .js .eyebrow { animation-delay: 0.05s; }
+  .js .sub { animation-delay: 0.95s; }
+  .js .lede { animation-delay: 1.1s; }
+  .js .ctas { animation-delay: 1.25s; }
+  @keyframes sg-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* 狀態標籤 */
+  .hud { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
+  .hud.on { opacity: 1; }
+  .hud .card {
+    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 16px; padding: 12px 18px;
+    box-shadow: 0 18px 36px -20px rgba(12, 46, 54, 0.55), 0 0 0 1px rgba(12, 46, 54, 0.05); white-space: nowrap;
+  }
+  .hud .t { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 0.98rem; color: var(--ink); line-height: 1.4; }
+  .hud .t i { width: 10px; height: 10px; border-radius: 50%; background: var(--alert); box-shadow: 0 0 0 4px rgba(224, 138, 30, 0.2); transition: background 0.4s, box-shadow 0.4s; }
+  .hud.safe .t i { background: var(--brand-mint); box-shadow: 0 0 0 4px rgba(102, 194, 174, 0.25); }
+  .hud .stem { display: block; width: 2px; height: 26px; margin: 0 auto; background: linear-gradient(var(--ink-soft), transparent); opacity: 0.6; }
+
+  /* 步態訊號條 */
+  .strip {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; height: 96px;
+    display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 24px;
+    padding-inline: var(--gutter);
+    background: linear-gradient(rgba(244, 248, 247, 0), rgba(244, 248, 247, 0.95) 40%);
+  }
+  .strip .lbl { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--ink-soft); line-height: 1.6; }
+  .strip .lbl b { display: block; font-family: var(--font-sans); font-size: 0.85rem; letter-spacing: 0.04em; color: var(--ink); }
+  .strip canvas { width: 100%; height: 58px; }
+
+  @media (max-width: 820px) {
+    .copy { padding-top: clamp(92px, 11vh, 104px); }
+    .ctas { gap: 10px; }
+    .ctas .btn { min-height: 50px; padding: 0 20px; font-size: 0.97rem; }
+    .veil { background: linear-gradient(180deg, rgba(244, 248, 247, 0.9) 0%, rgba(244, 248, 247, 0.75) 48%, rgba(244, 248, 247, 0) 62%); }
+    .strip { grid-template-columns: 1fr; height: 76px; }
+    .strip .lbl { display: none; }
+    .hud .card { padding: 10px 14px; }
+    .hud .stem { height: 14px; }
+  }
+
+  /* ── 手機（≤767px）：一般垂直排列，不使用任何 vh 自適應 ──
+     標籤 → 標題 → 副標 → 說明 → 按鈕 → 感測場景 → 步態波形 */
+  @media (max-width: 767px) {
+    .hero { display: flex; flex-direction: column; padding-bottom: 8px; }
+    .copy { padding-top: 104px; }
+    .veil { display: none; }
+    /* 感測場景：等比縮放的獨立區塊，與文字不重疊 */
+    .stage {
+      position: relative; width: 100%; margin-top: 28px;
+      aspect-ratio: 6 / 5; min-height: 300px; max-height: 440px;
+    }
+    .strip { position: relative; left: auto; right: auto; bottom: auto; height: 64px; background: none; }
+    /* 手機效能：取消毛玻璃、混色模式與模糊濾鏡（改用不透明底色） */
+    .hero :global(.shoe) { mix-blend-mode: normal; will-change: auto; }
+    .hud .card { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
+    .js h1 :global(.ch) { filter: none; animation-name: sg-rise-lite; }
+    @keyframes sg-rise-lite { to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<script>
+  import { initHeroScene } from '../scripts/hero-scene';
+  const root = document.querySelector<HTMLElement>('[data-hero]');
+  if (root) {
+    // 標題逐字浮現；逗號後半段套品牌漸層
+    const h1 = root.querySelector<HTMLElement>('[data-split]')!;
+    const text = h1.textContent ?? '';
+    const [a, b] = text.split('，');
+    let i = 0;
+    const wrap = (s: string, cls = '') =>
+      [...s].map((c) => `<span class="ch ${cls}" style="animation-delay:${0.12 + i++ * 0.065}s">${c}</span>`).join('');
+    h1.setAttribute('aria-label', text);
+    // 兩段各自不斷行：窄螢幕只會在逗號後換行
+    h1.innerHTML = b !== undefined
+      ? `<span aria-hidden="true"><span class="seg">${wrap(a)}${wrap('，', 'comma')}</span><span class="seg">${wrap(b, 'accent')}</span></span>`
+      : `<span aria-hidden="true">${wrap(text)}</span>`;
+    initHeroScene(root);
+  }
+</script>

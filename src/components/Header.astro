@@ -1,0 +1,127 @@
+---
+import { Image } from 'astro:assets';
+import site from '../../content/site.json';
+import logo from '../assets/logo.png';
+import Icon from './Icon.astro';
+
+interface Props { overlay?: boolean }
+const { overlay = false } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) => path === href || path.startsWith(href + '/');
+---
+<header class:list={['site-header', { overlay }]} data-header>
+  <div class="bar container">
+    <a class="brand" href="/" aria-label={`${site.name} 首頁`}>
+      <Image src={logo} alt="" width={36} height={41} densities={[1, 2, 3]} loading="eager" />
+      <span>{site.name}<small>SMARTGUARD TECH</small></span>
+    </a>
+    <nav class="desktop" aria-label="主要導覽">
+      {site.nav.map((l) => (
+        <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>
+      ))}
+      <a class="btn btn-primary sm" href={site.navCta.href}>{site.navCta.label}</a>
+    </nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-btn>
+      <span class="sr-only" data-menu-label>開啟選單</span>
+      <Icon name="Menu" class="i-open" />
+      <Icon name="X" class="i-close" />
+    </button>
+  </div>
+  <nav id="mobile-nav" class="mobile" aria-label="行動版導覽" hidden data-menu>
+    {site.nav.map((l) => (
+      <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}<Icon name="ArrowRight" size={20} /></a>
+    ))}
+    <a class="btn btn-primary" href={site.navCta.href}>{site.navCta.label}</a>
+  </nav>
+  <span class="progress" aria-hidden="true"></span>
+</header>
+
+<style>
+  .site-header {
+    position: sticky; top: 0; z-index: 50;
+    view-transition-name: site-header;   /* 換頁時頁首保持不動 */
+    transition: background-color 0.3s, box-shadow 0.3s, backdrop-filter 0.3s;
+  }
+  /* 捲動進度線（品牌漸層）；不支援 scroll-timeline 的瀏覽器不顯示 */
+  .progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brand-grad); transform-origin: left; transform: scaleX(0); pointer-events: none; }
+  @supports (animation-timeline: scroll()) {
+    .progress { animation: sg-progress linear both; animation-timeline: scroll(root); }
+  }
+  @keyframes sg-progress { to { transform: scaleX(1); } }
+  /* 捲動後收窄：只在桌機的浮動頁首（首頁）啟用；內頁頁首在排版流中，改高度會讓整頁重排 */
+  @media (min-width: 768px) and (pointer: fine) {
+    .overlay .bar { transition: height 0.35s var(--ease-out); }
+    .overlay.scrolled .bar { height: 64px; }
+  }
+  .site-header.overlay { position: fixed; left: 0; right: 0; }
+  .site-header.scrolled, .site-header:not(.overlay), .site-header.open {
+    background: rgba(244, 248, 247, 0.86);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 var(--line);
+  }
+  /* 手機／觸控：頁首不用毛玻璃（捲動時每格都要重新模糊背景），改用接近不透明的底色 */
+  @media (max-width: 767px), (pointer: coarse) {
+    .site-header.scrolled, .site-header:not(.overlay), .site-header.open {
+      background: rgba(244, 248, 247, 0.97); backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
+  }
+  .bar { display: flex; align-items: center; justify-content: space-between; height: 76px; }
+  .brand { display: flex; align-items: center; gap: 12px; min-height: 48px; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.04em; }
+  .brand img { width: 34px; height: auto; }
+  .brand small { display: none; margin-left: 10px; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.16em; color: var(--cyan-ink); }
+  .desktop { display: none; align-items: center; gap: clamp(8px, 1.4vw, 20px); }
+  .desktop a:not(.btn) {
+    position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px;
+    text-decoration: none; color: var(--ink); font-weight: 500; font-size: 0.98rem; padding: 0 8px;
+  }
+  .desktop a:not(.btn)::after {
+    content: ""; position: absolute; left: 8px; right: 8px; bottom: 6px; height: 2px; border-radius: 2px;
+    background: var(--brand-grad); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease-out);
+  }
+  .desktop a:not(.btn):hover::after, .desktop a[aria-current='page']::after { transform: scaleX(1); }
+  .btn.sm { min-height: 44px; padding: 0 20px; font-size: 0.94rem; }
+
+  .menu-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+  .menu-btn :global(.i-close) { display: none; }
+  .open .menu-btn :global(.i-open) { display: none; }
+  .open .menu-btn :global(.i-close) { display: block; }
+  .mobile { display: flex; flex-direction: column; gap: 4px; padding: 8px var(--gutter) 24px; border-top: 1px solid var(--line); }
+  .mobile[hidden] { display: none; }
+  .mobile:not([hidden]) { animation: sg-menu 0.35s var(--ease-out); }
+  .mobile:not([hidden]) a { animation: sg-menu-item 0.45s var(--ease-out) both; }
+  .mobile:not([hidden]) a:nth-child(2) { animation-delay: 0.04s; }
+  .mobile:not([hidden]) a:nth-child(3) { animation-delay: 0.08s; }
+  .mobile:not([hidden]) a:nth-child(4) { animation-delay: 0.12s; }
+  .mobile:not([hidden]) a:nth-child(5) { animation-delay: 0.16s; }
+  @keyframes sg-menu { from { opacity: 0; transform: translateY(-8px); } }
+  @keyframes sg-menu-item { from { opacity: 0; transform: translateX(-10px); } }
+  .mobile a:not(.btn) { display: flex; justify-content: space-between; align-items: center; min-height: 56px; padding: 0 8px; font-size: 1.1rem; font-weight: 500; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .mobile a[aria-current='page'] { color: var(--cyan-ink); }
+  .mobile .btn { margin-top: 16px; }
+
+  @media (min-width: 900px) {
+    .desktop { display: flex; }
+    .menu-btn, .mobile { display: none !important; }
+    .brand small { display: inline; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]')!;
+  const btn = header.querySelector<HTMLButtonElement>('[data-menu-btn]')!;
+  const menu = header.querySelector<HTMLElement>('[data-menu]')!;
+  const label = header.querySelector<HTMLElement>('[data-menu-label]')!;
+  const setOpen = (open: boolean) => {
+    menu.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    label.textContent = open ? '關閉選單' : '開啟選單';
+    header.classList.toggle('open', open);
+  };
+  btn.addEventListener('click', () => setOpen(menu.hasAttribute('hidden')));
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hasAttribute('hidden')) { setOpen(false); btn.focus(); } });
+  // 只在跨過門檻時才改 class（捲動事件中不做任何版面讀取或重計算）
+  let scrolled: boolean | null = null;
+  const onScroll = () => { const s = scrollY > 24; if (s !== scrolled) { scrolled = s; header.classList.toggle('scrolled', s); } };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>

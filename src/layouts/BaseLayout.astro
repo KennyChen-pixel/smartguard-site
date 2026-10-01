@@ -1,0 +1,78 @@
+---
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { displayFontUrl, MONO_FONT_URL } from '../lib/fonts';
+
+interface Props {
+  title: string;
+  description: string;
+  product?: boolean;
+  noindex?: boolean;
+  headerOverlay?: boolean;
+  faq?: { q: string; a: string }[];
+}
+const { title, description, product, noindex, headerOverlay = false, faq } = Astro.props;
+const displayFont = displayFontUrl();
+---
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0c2e36" />
+    <link rel="icon" type="image/png" href="/favicon-64.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <Seo title={title} description={description} product={product} noindex={noindex} faq={faq} />
+
+    <!-- 字體：內文用系統中文字體；標題字體只載入網站用到的字（建置時自動計算），皆非阻塞 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={displayFont} media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href={MONO_FONT_URL} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={displayFont} /><link rel="stylesheet" href={MONO_FONT_URL} /></noscript>
+
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要內容</a>
+    <Header overlay={headerOverlay} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // 捲動進場：只處理載入時在畫面下方的元素；進入畫面時加上 .is-in
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('t');
+      if (!reduce) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-in');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        const pending: Element[] = [];
+        document.querySelectorAll('[data-reveal]').forEach((el) => {
+          if (el.getBoundingClientRect().top > innerHeight) {
+            el.classList.add('reveal-pending');
+            pending.push(el);
+          }
+        });
+        requestAnimationFrame(() => {
+          pending.forEach((el) => {
+            el.classList.add('reveal-ready');
+            io.observe(el);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

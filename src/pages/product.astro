@@ -1,0 +1,126 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHead from '../components/SectionHead.astro';
+import FeatureGrid from '../components/FeatureGrid.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import product from '../../content/product.json';
+import faq from '../../content/faq.json';
+import home from '../../content/home.json';
+import { getImage } from '../lib/images';
+import { isTodo } from '../lib/text';
+const cutout = getImage(product.heroImage.image);
+// 常見問題：附加句只有 show 為 true 才公開；含 TODO 的題目不寫入結構化資料
+type FaqItem = { q: string; a: string; extra?: { text: string; show: boolean } };
+const faqItems = (faq.items as FaqItem[]).map((f) => ({
+  q: f.q,
+  a: f.extra?.show ? `${f.a}${f.extra.text}` : f.a,
+}));
+const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
+---
+<BaseLayout title={product.seo.title} description={product.seo.description} product faq={faqLd}>
+  <section class="p-hero paper-grid">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="container grid">
+      <div class="copy">
+        <p class="eyebrow">{product.eyebrow}</p>
+        <h1 class="display">{product.name}</h1>
+        <p class="lede">{product.lede}</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href={home.hero.ctaPrimary.href}>{home.hero.ctaPrimary.label}<Icon name="ArrowRight" /></a>
+          <a class="btn btn-ghost" href="/technology">{home.hero.ctaSecondary.label}</a>
+        </div>
+      </div>
+      <div class="stage" aria-hidden="false">
+        <div class="orbit o1" aria-hidden="true"></div>
+        <div class="orbit o2" aria-hidden="true"></div>
+        <div class="scan" aria-hidden="true"></div>
+        <Image class="device" src={cutout} alt={product.heroImage.alt} widths={[320, 480, 640]} sizes="(max-width: 900px) 70vw, 420px" loading="eager" fetchpriority="high" />
+        <div class="beam" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="hotspot" aria-hidden="true"><span class="dot"></span><span class="lead"></span><span class="chip">距離感測模組</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section on-deep features-sec">
+    <div class="container">
+      <SectionHead eyebrow={home.techIntro.eyebrow} title={home.techIntro.title} body={home.techIntro.body} layout="split" />
+      <div class="gap"><FeatureGrid items={product.features} tone="deep" /></div>
+    </div>
+  </section>
+
+  <section class="section paper-grid">
+    <div class="container two faq-wrap">
+      <div class="faq-head">
+        <SectionHead eyebrow="FAQ" title={faq.title} />
+      </div>
+      <div>
+        <div class="faq" data-reveal>
+          {faqItems.map((f) => (
+            <details class:list={['card', { todo: isTodo(f.q) || isTodo(f.a) }]}>
+              <summary><span>{f.q}</span><Icon name="Plus" size={20} /></summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .p-hero { position: relative; overflow: hidden; padding: clamp(48px, 7vw, 96px) 0 clamp(56px, 8vw, 112px); border-bottom: 1px solid var(--line); }
+  .glow { position: absolute; inset: 0; background: radial-gradient(50vw 50vh at 80% 30%, rgba(79, 192, 225, 0.18), transparent 70%), radial-gradient(40vw 40vh at 90% 0%, var(--warm-glow), transparent 70%); }
+  .grid { position: relative; display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 960px) { .grid { grid-template-columns: 1.1fr 1fr; } }
+  h1 { font-size: clamp(1.7rem, 3.3vw, 3rem); margin-top: var(--space-eyebrow); letter-spacing: 0.02em; }
+  .ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 14px; }
+
+  .stage { position: relative; aspect-ratio: 1; max-width: 520px; width: 100%; margin-inline: auto; display: grid; place-items: center; }
+  .orbit { position: absolute; border-radius: 50%; border: 1px dashed rgba(13, 106, 134, 0.35); }
+  .o1 { inset: 6%; animation: sg-spin 40s linear infinite; }
+  .o2 { inset: 18%; border-style: solid; border-color: rgba(102, 194, 174, 0.35); animation: sg-spin 28s linear infinite reverse; }
+  .o1::before, .o2::before { content: ""; position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--brand-cyan); box-shadow: 0 0 12px var(--brand-cyan); }
+  .o2::before { background: var(--brand-mint); box-shadow: 0 0 12px var(--brand-mint); }
+  @keyframes sg-spin { to { transform: rotate(360deg); } }
+  .scan { position: absolute; inset: 14%; border-radius: 50%; background: conic-gradient(from 0deg, rgba(79, 192, 225, 0.22), transparent 25%); animation: sg-spin 5s linear infinite; -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 72%); mask-image: radial-gradient(circle, #000 55%, transparent 72%); }
+  .stage :global(.device) { position: relative; width: 74%; height: auto; filter: drop-shadow(0 30px 30px rgba(12, 46, 54, 0.28)); animation: sg-float 6s ease-in-out infinite; }
+  @keyframes sg-float { 50% { transform: translateY(-12px); } }
+  /* 手機／觸控：移除持續動畫元素上的濾鏡與毛玻璃（每格都要重新計算） */
+  @media (max-width: 767px), (pointer: coarse) {
+    .stage :global(.device) { filter: none; }
+    .hotspot .chip { backdrop-filter: none; background: #fff; }
+  }
+  .beam { position: absolute; left: 50%; top: 36%; width: 0; height: 0; }
+  .beam i { position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(79, 192, 225, 0.8); animation: sg-ping 2.4s var(--ease-out) infinite; opacity: 0; }
+  .beam i:nth-child(2) { animation-delay: 0.8s; }
+  .beam i:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes sg-ping { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(4); opacity: 0; } }
+  /* 感測模組標註 */
+  .hotspot { position: absolute; left: 50%; top: 36%; display: flex; align-items: center; pointer-events: none; animation: sg-float 6s ease-in-out infinite; }
+  .hotspot .dot { width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--brand-cyan), 0 0 16px rgba(79, 192, 225, 0.9); }
+  .hotspot .lead { width: clamp(40px, 8vw, 96px); height: 1.5px; background: linear-gradient(90deg, var(--brand-cyan), rgba(79, 192, 225, 0.2)); transform: translateY(-18px) rotate(-18deg); transform-origin: left; }
+  .hotspot .chip { transform: translateY(-40px); padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); border: 1px solid rgba(79, 192, 225, 0.5); box-shadow: 0 10px 24px -14px rgba(12, 46, 54, 0.5); font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; backdrop-filter: blur(6px); }
+
+  .gap { margin-top: var(--space-block); }
+
+  .features-sec { overflow: hidden; }
+  .features-sec::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50vw 50vh at 100% 0%, rgba(79, 192, 225, 0.16), transparent 70%); }
+  .features-sec .container { position: relative; }
+
+  .two { display: grid; gap: 40px; }
+  @media (min-width: 960px) {
+    .faq-wrap { grid-template-columns: 0.8fr 1.4fr; gap: 72px; align-items: start; }
+    .faq-head { position: sticky; top: 112px; }
+  }
+  .faq { display: grid; gap: 12px; }
+  details { padding: 0 22px; }
+  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 64px; padding-block: 16px; line-height: 1.6; cursor: pointer; font-weight: 700; color: var(--ink); }
+  summary::-webkit-details-marker { display: none; }
+  summary :global(.icon) { flex: none; color: var(--cyan-ink); transition: transform 0.3s var(--ease-out); }
+  details[open] summary :global(.icon) { transform: rotate(45deg); }
+  details p { padding-bottom: 20px; }
+</style>

@@ -1,0 +1,50 @@
+---
+import Icon from './Icon.astro';
+interface Feature { title: string; description: string; icon: string }
+interface Props { items: Feature[]; tone?: 'light' | 'deep' }
+const { items, tone = 'light' } = Astro.props;
+---
+<ul class:list={['grid', tone]}>
+  {items.map((f, i) => (
+    <li class="feat" data-reveal style={`--d:${i * 0.08}s`} data-glow>
+      <span class="ic"><Icon name={f.icon} size={24} /></span>
+      <h3>{f.title}</h3>
+      <p>{f.description}</p>
+    </li>
+  ))}
+</ul>
+<style>
+  .grid { list-style: none; padding: 0; display: grid; gap: 18px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .feat {
+    position: relative; padding: clamp(26px, 3vw, 36px); border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--line); background: var(--surface);
+    transition: transform 0.4s var(--ease-out), border-color 0.4s;
+  }
+  /* 游標跟隨光暈 */
+  .feat::before {
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s; pointer-events: none;
+    background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(79, 192, 225, 0.16), transparent 60%);
+  }
+  .feat:hover { transform: translateY(-4px); border-color: rgba(79, 192, 225, 0.5); }
+  .feat:hover::before { opacity: 1; }
+  .ic { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; color: var(--cyan-ink); background: linear-gradient(135deg, rgba(79, 192, 225, 0.14), rgba(102, 194, 174, 0.14)); border: 1px solid rgba(79, 192, 225, 0.35); }
+  h3 { margin-top: 22px; font-size: var(--fs-h3); font-weight: 700; }
+  p { margin-top: 10px; font-size: 1rem; line-height: 1.85; }
+
+  .deep .feat { background: rgba(255, 255, 255, 0.04); border-color: rgba(234, 245, 244, 0.12); }
+  .deep .feat:hover { border-color: rgba(79, 192, 225, 0.55); }
+  .deep .feat::before { background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(79, 192, 225, 0.2), transparent 60%); }
+  .deep .ic { color: var(--brand-cyan); background: rgba(79, 192, 225, 0.1); border-color: rgba(79, 192, 225, 0.35); }
+  .deep h3 { color: var(--on-deep); }
+  .deep p { color: var(--on-deep-soft); }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-glow]').forEach((el) => {
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  });
+</script>

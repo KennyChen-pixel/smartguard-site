@@ -1,0 +1,29 @@
+{
+  "_說明": "全站共用資訊：公司名稱、聯絡方式、導覽列、社群連結。修改後全站自動更新。",
+  "name": "智感先鋒科技",
+  "legalName": "智感先鋒科技有限公司",
+  "nameEn": "SmartGuard Tech",
+  "disclaimer": "SmartGuard 為行走安全輔助提醒工具，無法取代專業醫療照護與評估；本網站內容僅供產品介紹，不構成醫療建議。",
+  "brandLine": "智慧感測 主動守護",
+  "productName": "SmartGuard 智慧主動式防跌偵測系統",
+  "url": "https://smartguard-site.vercel.app",
+  "defaultDescription": "智慧感測，主動守護。智感先鋒科技以獨家距離感測技術，打造專為長者設計的穿戴式主動防跌系統，在跌倒發生之前築起防線。",
+  "contact": {
+    "email": "k3070447@gmail.com",
+    "phone": "0966-312-546",
+    "phoneIntl": "+886-966-312-546",
+    "address": "高雄市鼓山區蓮海路 70 號",
+    "addressLocality": "高雄市",
+    "streetAddress": "鼓山區蓮海路 70 號"
+  },
+  "social": {
+    "linkedin": "https://www.linkedin.com/company/smartguard-tech/"
+  },
+  "nav": [
+    { "label": "產品", "href": "/product" },
+    { "label": "技術與原理", "href": "/technology" },
+    { "label": "團隊", "href": "/team" },
+    { "label": "最新消息", "href": "/news" }
+  ],
+  "navCta": { "label": "聯絡與合作", "href": "/contact" }
+}

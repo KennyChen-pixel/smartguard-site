@@ -1,0 +1,184 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Icon from '../components/Icon.astro';
+import contact from '../../content/contact.json';
+import site from '../../content/site.json';
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
+---
+<BaseLayout title={contact.seo.title} description={contact.seo.description}>
+  <PageHeader eyebrow={contact.eyebrow} title={contact.title} body={contact.body} />
+
+  <section class="section">
+    <div class="container grid">
+      <aside class="info" data-reveal>
+        <ul>
+          <li>
+            <span class="ic"><Icon name="Mail" size={20} /></span>
+            <div><p class="k">Email</p><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></div>
+          </li>
+          <li>
+            <span class="ic"><Icon name="Phone" size={20} /></span>
+            <div><p class="k">電話</p><a href={`tel:${site.contact.phoneIntl}`}>{site.contact.phone}</a></div>
+          </li>
+          <li>
+            <span class="ic"><Icon name="MapPin" size={20} /></span>
+            <div><p class="k">地址</p><p class="v">{site.contact.address}</p></div>
+          </li>
+          <li>
+            <span class="ic"><Icon name="Linkedin" size={20} /></span>
+            <div><p class="k">LinkedIn</p><a href={site.social.linkedin} target="_blank" rel="noopener noreferrer">智感先鋒科技官方頁面<span class="sr-only">（另開新視窗）</span></a></div>
+          </li>
+        </ul>
+      </aside>
+
+      <div class="card form-card" data-reveal style="--d:.1s">
+        <form data-form data-key={accessKey} data-fallback={site.contact.email} novalidate>
+          <input type="hidden" name="subject" value="【SmartGuard 官網諮詢】" />
+          <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="fields">
+            <label>
+              <span>姓名 <b aria-hidden="true">*</b></span>
+              <input name="name" type="text" autocomplete="name" placeholder="王小明" required aria-describedby="err-name" />
+              <small id="err-name" class="err" role="alert"></small>
+            </label>
+            <label>
+              <span>單位 / 機構</span>
+              <input name="org" type="text" autocomplete="organization" placeholder="○○長照機構" />
+            </label>
+            <label>
+              <span>Email <b aria-hidden="true">*</b></span>
+              <input name="email" type="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="err-email" />
+              <small id="err-email" class="err" role="alert"></small>
+            </label>
+            <label>
+              <span>需求類別</span>
+              <select name="type">
+                {contact.types.map((t) => <option value={t}>{t}</option>)}
+              </select>
+            </label>
+            <label class="full">
+              <span>訊息內容</span>
+              <textarea name="message" rows="5" placeholder="請簡述您的需求…"></textarea>
+            </label>
+          </div>
+          <button class="btn btn-primary submit" type="submit"><Icon name="Send" /><span data-submit-label>送出諮詢</span></button>
+          <p class="form-err" role="alert" data-form-err></p>
+          <p class="privacy">您填寫的資料僅用於回覆本次諮詢。</p>
+        </form>
+
+        <div class="done" data-done hidden tabindex="-1">
+          <span class="ok"><Icon name="CheckCircle" size={40} /></span>
+          <h2>{contact.success.title}</h2>
+          <p>{contact.success.body}</p>
+          <button class="btn btn-ghost" type="button" data-again><Icon name="Refresh" />{contact.success.again}</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid { display: grid; gap: 40px; }
+  @media (min-width: 960px) { .grid { grid-template-columns: 0.8fr 1.4fr; align-items: start; } }
+  .info ul { list-style: none; padding: 0; display: grid; gap: 22px; }
+  .info li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: center; }
+  .ic { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, rgba(79, 192, 225, 0.14), rgba(102, 194, 174, 0.14)); color: var(--cyan-ink); }
+  .k { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; color: var(--ink-soft); }
+  .info a, .v { color: var(--ink); font-weight: 700; word-break: break-all; text-decoration: none; }
+  .info a { display: inline-flex; align-items: center; min-height: 44px; }
+  .info a:hover { color: var(--cyan-ink); text-decoration: underline; }
+  .form-card { padding: clamp(24px, 4vw, 44px); }
+  .fields { display: grid; gap: 20px; }
+  @media (min-width: 640px) { .fields { grid-template-columns: 1fr 1fr; } .full { grid-column: 1 / -1; } }
+  label { display: flex; flex-direction: column; gap: 8px; font-weight: 700; color: var(--ink); font-size: 0.98rem; }
+  label b { color: var(--alert-ink); }
+  input, select, textarea {
+    min-height: 52px; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--line-strong); background: #fff;
+    font-weight: 400; font-size: 1rem; color: var(--ink); transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea { resize: vertical; min-height: 140px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cyan-ink); box-shadow: 0 0 0 4px rgba(79, 192, 225, 0.22); }
+  input[aria-invalid='true'] { border-color: #c2410c; }
+  .err { font-weight: 500; font-size: 0.88rem; color: #b42318; }
+  .err:empty { display: none; }
+  .hp { position: absolute; left: -9999px; }
+  .submit { width: 100%; margin-top: 28px; }
+  .submit[disabled] { opacity: 0.6; cursor: progress; }
+  .form-err { margin-top: 14px; color: #b42318; font-weight: 500; }
+  .form-err:empty { display: none; }
+  .privacy { margin-top: 14px; font-size: 0.85rem; color: var(--ink-soft); text-align: center; }
+  .done { text-align: center; padding: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .done[hidden] { display: none; }
+  .ok { color: var(--mint-ink); }
+  .done h2 { font-size: 1.5rem; }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-form]')!;
+  const done = document.querySelector<HTMLElement>('[data-done]')!;
+  const again = document.querySelector<HTMLButtonElement>('[data-again]')!;
+  const errBox = form.querySelector<HTMLElement>('[data-form-err]')!;
+  const label = form.querySelector<HTMLElement>('[data-submit-label]')!;
+  const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+  const fallback = form.dataset.fallback;
+
+  // 從網址帶入需求類別：/contact?type=商務合作
+  const pre = new URLSearchParams(location.search).get('type');
+  const sel = form.elements.namedItem('type') as HTMLSelectElement;
+  if (pre && [...sel.options].some((o) => o.value === pre)) sel.value = pre;
+
+  const setErr = (name: string, msg: string) => {
+    const input = form.elements.namedItem(name) as HTMLInputElement;
+    const small = document.getElementById(`err-${name}`)!;
+    small.textContent = msg;
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  };
+  ['name', 'email'].forEach((n) => (form.elements.namedItem(n) as HTMLInputElement).addEventListener('input', () => setErr(n, '')));
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const name = String(data.get('name') ?? '').trim();
+    const email = String(data.get('email') ?? '').trim();
+    let ok = true;
+    if (!name) { setErr('name', '請填寫姓名'); ok = false; }
+    if (!email) { setErr('email', '請填寫 Email'); ok = false; }
+    else if (!/^\S+@\S+\.\S+$/.test(email)) { setErr('email', 'Email 格式不正確，請確認後再送出'); ok = false; }
+    if (!ok) { (form.querySelector('[aria-invalid=true]') as HTMLElement)?.focus(); return; }
+    if (data.get('botcheck')) return;
+
+    const key = form.dataset.key;
+    if (!key) { errBox.textContent = `表單暫時無法送出，請直接寄信至 ${fallback}。`; return; }
+
+    btn.disabled = true; label.textContent = '送出中…'; errBox.textContent = '';
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: key,
+          subject: `【SmartGuard 官網諮詢】${data.get('type')} - ${name}`,
+          from_name: 'SmartGuard 官網表單',
+          姓名: name,
+          單位機構: data.get('org'),
+          Email: email,
+          需求類別: data.get('type'),
+          訊息內容: data.get('message'),
+        }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        form.hidden = true; done.hidden = false; done.focus();
+      } else {
+        errBox.textContent = `送出失敗，請稍後再試，或直接寄信至 ${fallback}。`;
+      }
+    } catch {
+      errBox.textContent = '送出失敗，請確認網路連線後再試一次。';
+    } finally {
+      btn.disabled = false; label.textContent = '送出諮詢';
+    }
+  });
+
+  again.addEventListener('click', () => { form.reset(); done.hidden = true; form.hidden = false; (form.elements.namedItem('name') as HTMLInputElement).focus(); });
+</script>

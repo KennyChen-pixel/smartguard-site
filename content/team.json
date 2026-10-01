@@ -1,0 +1,47 @@
+{
+  "_說明": "團隊頁。about 為品牌故事（原官網「關於我們」）；members 為成員（photo 填 src/assets/images/ 裡的檔名，可留空）；partners 為合作夥伴。",
+  "seo": {
+    "title": "團隊｜科技更有溫度 用智慧守護摯愛｜智感先鋒科技",
+    "description": "智感先鋒科技是一群來自工程與醫療科技領域的創新夥伴，將距離感測技術轉化為溫暖、輕量且無感的日常陪伴。"
+  },
+  "about": {
+    "eyebrow": "ABOUT US",
+    "title": "科技更有溫度 用智慧守護摯愛",
+    "quote": "智感先鋒科技的誕生，源於一個簡單卻深刻的初心——我們希望能用最頂尖的科技，為家中的長者築起一道安心的防線。",
+    "paragraphs": [
+      "我們是一群來自工程與醫療科技領域的創新夥伴。我們深知，隨著高齡化社會到來，跌倒往往是長者健康最大的隱形威脅。因此，我們走進照護現場，將複雜的「距離感測技術」轉化為溫暖、輕量且無感的日常陪伴。",
+      "我們不追求冰冷的數據，而是專注於「主動防護」的每一個細節。智感先鋒科技將持續秉持對生命的關懷，結合跨領域的研發實力，打造最懂長者、也最讓照護者安心的 AgeTech 智慧照護系統，讓每位長輩都能在科技的守護下，享受尊嚴、安全且自信的銀髮生活。"
+    ]
+  },
+  "photo": {
+    "image": "team.jpg",
+    "alt": "智感先鋒科技團隊於 Medical Taiwan 台灣國際醫療暨健康照護展攤位合影",
+    "caption": "團隊於 Medical Taiwan 台灣國際醫療暨健康照護展，現場展出智慧主動式防跌偵測系統"
+  },
+  "membersTitle": "團隊成員",
+  "_members來源": "姓名依《SmartGuard_Ustart_二階營運計畫簡報_v5》第 15 頁；職稱依負責人 2026-10-01 指示（Founder）；只顯示姓名與職稱。陳璟照片取自 2026 gsic 競賽圖庫具名檔案；蕭喻心照片為負責人提供之「蕭喻心.jpg」；皆統一裁切為 4:5。",
+  "members": [
+    {
+      "name": "陳璟 Kenny",
+      "role": "Founder & CTO ｜ 技術研發長",
+      "photo": "team-chen-jing.jpg"
+    },
+    {
+      "name": "蕭喻心",
+      "role": "Founder & CEO ｜ 執行長",
+      "photo": "team-hsiao-yu-hsin.jpg"
+    },
+    {
+      "name": "范哲銓",
+      "role": "COO ｜ 營運長",
+      "photo": "",
+      "_待補": "TODO：個人照片（放入 src/assets/images/ 後填入檔名，建議直式 4:5）"
+    }
+  ],
+  "showPartners": false,
+  "_showPartners說明": "合作夥伴區塊開關：設為 true 才會顯示（補齊下方 TODO 後再開啟）。",
+  "partnersTitle": "合作夥伴",
+  "partners": [
+    { "name": "TODO：合作單位名稱", "role": "TODO：合作內容" }
+  ]
+}
