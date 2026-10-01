@@ -63,7 +63,7 @@ npm run preview      # 預覽建置結果
 - `icon` 只能用：`Radio`（展會/活動）、`Award`（獲獎/入選）、`FileBadge`（專利/認證）、`Medal`（獎牌）
 - 沒有連結時 `url` 填 `""`
 
-**團隊成員**：`content/team.json` → `members`，每位 `{ name, role, bio, photo }`。`bio` 開頭的【分類】會自動變成小標籤。照片放 `src/assets/images/`（直式 4:5、檔名如 `team-姓名拼音.jpg`），沒有照片時 `photo` 留空，會顯示姓氏字首。
+**團隊成員**：`content/team.json` → `members`，每位 `{ name, role, photo }`（只顯示姓名與職稱）。照片放 `src/assets/images/`（直式 4:5、檔名如 `team-姓名拼音.jpg`），沒有照片時 `photo` 留空，會顯示姓氏字首。
 
 **新增產品特點**：`content/product.json` → `features` 加一筆 `{ "title", "description", "icon" }`（icon 另可用 `Shield`、`Cpu`、`Eye`、`HeartHandshake`）。
 
