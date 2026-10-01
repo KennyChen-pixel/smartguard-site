@@ -38,6 +38,9 @@ npm run preview      # 預覽建置結果
 | 常見問題 | `content/faq.json` | 顯示在產品頁，並自動輸出 FAQPage 結構化資料 |
 | 技術原理、「距離感測 ≠ 傳統 IMU」、運作流程 | `content/technology.json` | 運作流程目前隱藏：`flow.show: false` |
 | 關於我們、團隊照片、成員、合作夥伴 | `content/team.json` | 合作夥伴目前隱藏：`showPartners: false` |
+| 最新消息與榮譽 | `content/news.json` | 首頁自動顯示最上面 3 則 |
+| 聯絡頁文字、表單需求類別 | `content/contact.json` | |
+| 各頁 `<title>` 與 description | 各檔案的 `seo` 欄位 | title ≤ 60 字、description ≤ 160 字 |
 
 ### 顯示開關（隱藏但保留內容）
 
@@ -48,9 +51,6 @@ npm run preview      # 預覽建置結果
 | FAQ 附加句（例：視障者使用情境） | `faq.json` → 該題 `extra.show` | `false`（未驗證，不可公開） |
 
 開關設為 `false` 時，該區塊不會出現在網頁原始碼、也不會寫入結構化資料。以 `_` 開頭的欄位（如 `_待確認`、`_待補`）是內部備註，不會顯示。
-| 最新消息與榮譽 | `content/news.json` | 首頁自動顯示最上面 3 則 |
-| 聯絡頁文字、表單需求類別 | `content/contact.json` | |
-| 各頁 `<title>` 與 description | 各檔案的 `seo` 欄位 | title ≤ 60 字、description ≤ 160 字 |
 
 ### 常見操作
 
@@ -64,6 +64,8 @@ npm run preview      # 預覽建置結果
 - 沒有連結時 `url` 填 `""`
 
 **團隊成員**：`content/team.json` → `members`，每位 `{ name, role, photo }`（只顯示姓名與職稱）。照片放 `src/assets/images/`（直式 4:5、檔名如 `team-姓名拼音.jpg`），沒有照片時 `photo` 留空，會顯示姓氏字首。
+
+**更新產品主圖**（產品頁右側的去背產品圖）：新圖放 `src/assets/images/`（去背 PNG），改 `content/product.json` → `heroImage.image` 為新檔名、`heroImage.alt` 為描述；感測模組標註點位置在 `src/pages/product.astro` 的 `.hotspot`（換圖後需對位）。首頁主視覺的鞋子圖是 `product-render-2.png`，對位參數在 `hero-scene.ts`（感測模組位於圖片 352,88／554,248），換圖需重新對位，屬設計變更須先確認。
 
 **新增產品特點**：`content/product.json` → `features` 加一筆 `{ "title", "description", "icon" }`（icon 另可用 `Shield`、`Cpu`、`Eye`、`HeartHandshake`）。
 
@@ -119,3 +121,31 @@ npm run preview      # 預覽建置結果
 ## 更新流程
 
 一律使用 `/update-site <描述>`（見 `.claude/commands/update-site.md`）：改內容 → 檢查與建置 → 截圖確認 → 開分支 push → 給 Preview 連結 → 負責人說「上線」才 merge 到 `main`。
+
+- 負責人通常用 iPhone 看預覽；Preview 網址有 Vercel 部署保護，需登入 Vercel 帳號才看得到（不要為了測試去建立 protection bypass 金鑰）。
+- Preview 網址格式：`https://smartguard-site-git-<分支名，/ 換成 ->-smartguard-web.vercel.app`
+- 上線後要實測正式網址：各頁 200、`/google76491f48d04be451.html` 直接 200（不可轉址）、canonical 為乾淨網址。
+- 改到首頁主視覺時，須驗收首屏：桌機 1536×730、1366×650、1440×780、1920×950；手機 390×844、390×664、375×667；平板 768×1024。
+
+## 專案歷程與現況（給下一次的 Claude）
+
+> 舊檔 `HANDOFF.md`、`移交須注意事項.png` 是 2026/8 舊 React 版的交接筆記，**內容已過時**，以本檔為準。
+
+**2026-09-30 ～ 10-01 改版（已上線，main）**
+- 由 Vite + React 單頁改為 Astro 7 靜態多頁；舊程式碼保留在 `legacy/`。
+- 設計：醫療方格紙 × 3D 點陣地面；首頁主視覺為「長輩行走 → 感測聲波碰到門檻產生回波 → 震動預警 → 放慢 → 已於跌倒前預警」，底部步態訊號的偵測標記與動畫同一時間軸。配色取自 LOGO（天青 #4fc0e1 × 薄荷 #66c2ae）。
+- 首屏：768px 以上依視窗高度自適應（`hero-scene.ts` 的 `fitScene` 依可用高度計算透視）；767px 以下為一般垂直排列，場景是按鈕下方的獨立區塊。
+- 手機效能：點陣同排合併繪製（每格約 4.5ms）、畫面外暫停、觸控裝置不用 backdrop-filter／混色／模糊。
+- 內容：文案沿用公司原文；已依第三方審查移除無法佐證的用詞、加醫療免責聲明、正式公司名稱「智感先鋒科技有限公司」。團隊顯示：陳璟 Kenny（Founder & CTO）、蕭喻心 Aysel（Founder & CEO）、范哲銓（COO，暫無照片、不加英文名）。
+- Lighthouse 行動版：Performance ≥ 91、Accessibility／Best Practices／SEO 100。
+
+**負責人尚未決定 / 待提供**（不要自行修改，等負責人回覆）
+- 首頁眉標「AI 驅動主動防跌技術」是否保留（AI 個人化屬第二代研發中）
+- 「92% 受測長者安心感提升」是否補樣本數與時間
+- 產品頁是否註明「第一代產品試產中」
+- 范哲銓個人照；Medical Taiwan 新聞的新連結（原連結 404，目前不放連結）
+- 隱私權政策頁、公司網域信箱、自訂網域、Vercel 升級 Pro、GitHub App（手機留言 @claude 更新）
+
+**產品事實（僅供理解，未經同意不要搬上網站）**：依 2026 U-start 營運計畫簡報 v5，感測為 VL53L0X 雷射測距＋六軸 IMU；接近障礙未減速時以震動＋提示音預警；以魔鬼氈外加於長輩原本的鞋上。簡報檔不在 git 中（`*.pptx` 已排除）。
+
+**這台電腦的環境**：git 與 Vercel CLI 不在 PATH，用完整路徑（見「常用指令」）。Vercel CLI 已登入；GitHub 憑證存於 Windows 認證管理員，可直接 push。Claude Code 環境中 `GCM_INTERACTIVE=never`，若需重新登入 GitHub，請負責人執行 `! $env:GCM_INTERACTIVE='auto'; $env:GIT_TERMINAL_PROMPT='1'; git push`。
