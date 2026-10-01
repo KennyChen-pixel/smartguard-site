@@ -20,7 +20,7 @@ const h = home.hero;
   <div class="vib" data-vib aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="veil" aria-hidden="true"></div>
 
-  <div class="copy container">
+  <div class="copy container" data-copy>
     <p class="eyebrow">{h.eyebrow}</p>
     <h1 id="hero-title" class="display" data-split>{h.title}</h1>
     <p class="sub">{h.subtitle}</p>
@@ -38,16 +38,22 @@ const h = home.hero;
     <span class="stem"></span>
   </div>
 
-  <div class="strip" aria-hidden="true">
+  <div class="strip" data-strip aria-hidden="true">
     <p class="lbl"><b>步態訊號</b>GAIT SIGNAL</p>
     <canvas data-gait></canvas>
   </div>
 </section>
 
 <style>
+  /* 首屏高度＝可視高度扣掉「露出量」，讓下一區塊邊緣露出、暗示可往下捲。
+     100vh 為舊瀏覽器備援，100dvh／100svh 依序覆蓋（行動瀏覽器網址列收合時不跳動）。 */
   .hero {
+    --peek: clamp(16px, 3.2vh, 36px);
     position: relative; isolation: isolate; overflow: hidden;
-    height: 100svh; min-height: 720px; max-height: 1100px;
+    height: calc(100vh - var(--peek));
+    height: calc(100dvh - var(--peek));
+    height: calc(100svh - var(--peek));
+    min-height: 500px; max-height: 1100px;
     background: var(--paper);
   }
   /* 平面方格紙 → 往下淡出，交棒給 3D 點陣地面 */
@@ -95,9 +101,29 @@ const h = home.hero;
   .vib.on i:nth-child(3) { animation-delay: 0.44s; }
   @keyframes sg-ring { 0% { transform: scale(0.4); opacity: 0.95; } 100% { transform: scale(2.4); opacity: 0; } }
 
-  .copy { position: relative; z-index: 4; padding-top: clamp(112px, 17vh, 176px); }
+  .copy { position: relative; z-index: 4; padding-top: 104px; }
   h1 {
     font-size: var(--fs-h1); line-height: var(--lh-display); margin-top: var(--space-eyebrow); letter-spacing: 0.03em;
+  }
+  /* 桌機／橫向：字級與間距同時參考視窗寬度與高度（vw + vh），視窗變矮時一起收斂 */
+  @media (min-width: 821px) {
+    .copy { padding-top: clamp(84px, 9vh + 34px, 168px); }
+    h1 { font-size: clamp(2.5rem, 4.2vw + 2.2vh, 6rem); margin-top: clamp(10px, 1.8vh, 18px); }
+    .sub { font-size: clamp(1.15rem, 1.1vw + 1vh, 1.75rem); margin-top: clamp(8px, 1.6vh, 16px); }
+    .lede { font-size: clamp(1rem, 0.55vw + 0.9vh, 1.2rem); margin-top: clamp(10px, 2.2vh, 24px); }
+    .ctas { margin-top: clamp(16px, 3.8vh, 40px); }
+  }
+  /* 矮視窗（筆電 125% 縮放、瀏覽器工具列較多時）再收緊 */
+  @media (min-width: 821px) and (max-height: 800px) {
+    .lede { line-height: 1.75; }
+    .strip { height: 84px; }
+  }
+  @media (min-width: 821px) and (max-height: 700px) {
+    .copy { padding-top: 84px; }
+    .lede { max-width: 40em; }
+    .strip { height: 74px; }
+    .strip canvas { height: 48px; }
+    .hud .stem { height: 16px; }
   }
   @media (min-width: 900px) { h1 { white-space: nowrap; } }
   h1 :global(.ch) { display: inline-block; }
@@ -144,14 +170,14 @@ const h = home.hero;
   .strip canvas { width: 100%; height: 58px; }
 
   @media (max-width: 820px) {
-    .hero { height: auto; min-height: max(100svh, 900px); }
-    .copy { padding-top: 104px; }
+    .copy { padding-top: clamp(92px, 11vh, 104px); }
     .ctas { gap: 10px; }
     .ctas .btn { min-height: 50px; padding: 0 20px; font-size: 0.97rem; }
     .veil { background: linear-gradient(180deg, rgba(244, 248, 247, 0.9) 0%, rgba(244, 248, 247, 0.75) 48%, rgba(244, 248, 247, 0) 62%); }
     .strip { grid-template-columns: 1fr; height: 76px; }
     .strip .lbl { display: none; }
     .hud .card { padding: 10px 14px; }
+    .hud .stem { height: 14px; }
   }
 </style>
 

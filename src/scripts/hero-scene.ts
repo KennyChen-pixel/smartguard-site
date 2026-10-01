@@ -46,13 +46,39 @@ export function initHeroScene(root: HTMLElement) {
     GRID = narrow ? 0.56 : 0.42;
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    F = H * (narrow ? 0.55 : 0.9);
-    HZ = H * (narrow ? 0.665 : 0.44);
-    CX = W * (narrow ? 0.34 : 0.4);
     XS = narrow ? 0.42 : 1;
+    fitScene(narrow);
     const gw = gc.clientWidth, gh = gc.clientHeight;
     gc.width = Math.round(gw * DPR); gc.height = Math.round(gh * DPR);
     gx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  /* 依可用高度自適應場景：
+     1) 鞋子寬度同時受視窗寬、高限制；2) 鞋底固定在步態波形上方；
+     3) 由「鞋子感測點」與「提示卡最高可放位置」之間的空間，反推透視焦距 F 與地平線 HZ，
+        保證提示卡不壓到文字、鞋子與波形不被切掉。 */
+  const copyEl = root.querySelector<HTMLElement>('[data-copy]');
+  const stripEl = root.querySelector<HTMLElement>('[data-strip]');
+  // 投影係數：感測點（高 0.1，距 2.2）與偵測當下門檻頂（高 0.22，距 S.z+DET·√½）
+  const K_SENSOR = (CAM_H - 0.1) / S.z;
+  const K_OBST = (CAM_H - 0.22) / (S.z + (DET) * Math.SQRT1_2);
+  function fitScene(narrow: boolean) {
+    const stripH = stripEl?.offsetHeight ?? 90;
+    const sw = narrow
+      ? Math.max(170, Math.min(W * 0.55, H * 0.27, W < 600 ? 240 : 320))
+      : Math.max(190, Math.min(W * 0.25, H * 0.36, 390));
+    shoe.style.width = `${Math.round(sw)}px`;
+    // 場景中心：確保鞋子左緣（感測點左側約 0.64 個鞋寬）不超出畫面
+    CX = Math.max(W * (narrow ? 0.34 : 0.4), sw * 352 / 554 + (narrow ? 12 : 24));
+    const below = sw * (248 - 88) / 554;               // 感測點以下的鞋身高度
+    const sensorY = H - stripH - below + (narrow ? 4 : 10);
+    const heroTop = root.getBoundingClientRect().top;
+    const copyBottom = copyEl ? copyEl.getBoundingClientRect().bottom - heroTop : H * 0.5;
+    const hudSpace = narrow ? 74 : 96;                  // 提示卡＋連接線＋間距
+    const topLimit = narrow ? copyBottom + 10 : 92;     // 手機：文字下方；桌機：導覽列下方（門檻在右側，不與文字重疊）
+    const fMax = (sensorY - topLimit - hudSpace) / (K_SENSOR - K_OBST);
+    const fPref = H * (narrow ? 0.85 : 0.9);       // 空間足夠時（平板）場景放大填滿，不留大片空白
+    F = Math.max(H * (narrow ? 0.3 : 0.45), Math.min(fPref, fMax));
+    HZ = sensorY - K_SENSOR * F;
   }
   const P = (x: number, y: number, z: number) => ({
     x: CX + (x * XS - cam.x) * F / z,
@@ -386,6 +412,11 @@ export function initHeroScene(root: HTMLElement) {
   resize();
   const kick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); };
   addEventListener('resize', () => { resize(); kick(); });
+  // 文字區高度變化（字體載入、換行）時重新計算場景位置
+  if (copyEl && 'ResizeObserver' in window) {
+    let last = 0;
+    new ResizeObserver(() => { const h = copyEl.offsetHeight; if (h !== last) { last = h; resize(); kick(); } }).observe(copyEl);
+  }
   if (!still) {
     // 游標視差 ＋ 捲動景深：往下捲時地面緩緩後退（地平線上移）
     let pointerY = 0;
