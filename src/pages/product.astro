@@ -38,7 +38,6 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
         <div class="scan" aria-hidden="true"></div>
         <Image class="device" src={cutout} alt={product.heroImage.alt} widths={[320, 480, 640]} sizes="(max-width: 900px) 70vw, 420px" loading="eager" fetchpriority="high" />
         <div class="beam" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="hotspot" aria-hidden="true"><span class="dot"></span><span class="lead"></span><span class="chip">距離感測模組</span></div>
       </div>
     </div>
   </section>
@@ -92,18 +91,13 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
   /* 手機／觸控：移除持續動畫元素上的濾鏡與毛玻璃（每格都要重新計算） */
   @media (max-width: 767px), (pointer: coarse) {
     .stage :global(.device) { filter: none; }
-    .hotspot .chip { backdrop-filter: none; background: #fff; }
   }
-  .beam { position: absolute; left: 50%; top: 36%; width: 0; height: 0; }
+  /* 掃描波紋：對準感測模組（product-slipper-cutout.png 388×185，模組位於 266,34；圖片 74% 寬、置中），並與產品圖同步漂浮 */
+  .beam { position: absolute; left: 63.8%; top: 38.9%; width: 0; height: 0; animation: sg-float 6s ease-in-out infinite; }
   .beam i { position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(79, 192, 225, 0.8); animation: sg-ping 2.4s var(--ease-out) infinite; opacity: 0; }
   .beam i:nth-child(2) { animation-delay: 0.8s; }
   .beam i:nth-child(3) { animation-delay: 1.6s; }
   @keyframes sg-ping { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(4); opacity: 0; } }
-  /* 感測模組標註 */
-  .hotspot { position: absolute; left: 50%; top: 36%; display: flex; align-items: center; pointer-events: none; animation: sg-float 6s ease-in-out infinite; }
-  .hotspot .dot { width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--brand-cyan), 0 0 16px rgba(79, 192, 225, 0.9); }
-  .hotspot .lead { width: clamp(40px, 8vw, 96px); height: 1.5px; background: linear-gradient(90deg, var(--brand-cyan), rgba(79, 192, 225, 0.2)); transform: translateY(-18px) rotate(-18deg); transform-origin: left; }
-  .hotspot .chip { transform: translateY(-40px); padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); border: 1px solid rgba(79, 192, 225, 0.5); box-shadow: 0 10px 24px -14px rgba(12, 46, 54, 0.5); font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; backdrop-filter: blur(6px); }
 
   .gap { margin-top: var(--space-block); }
 
