@@ -8,8 +8,8 @@
   "eyebrow": "PRODUCT",
   "lede": "專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險，在跌倒發生「之前」就築起防線。",
   "heroImage": {
-    "image": "prototype-cutout.png",
-    "alt": "SmartGuard 防跌裝置實測原型：距離感測模組安裝於藍色拖鞋鞋面"
+    "image": "product-slipper-cutout.png",
+    "alt": "SmartGuard 智慧主動式防跌偵測系統：感測模組內嵌於拖鞋鞋面的一體化設計"
   },
   "features": [
     {
