@@ -7,6 +7,7 @@
   "name": "SmartGuard 智慧主動式防跌偵測系統",
   "eyebrow": "PRODUCT",
   "lede": "專為長者設計的穿戴式跌倒預防裝置，以獨家距離感測技術即時偵測環境風險，在跌倒發生「之前」就築起防線。",
+  "cta": { "label": "預約產品展示", "href": "/contact?type=產品諮詢" },
   "heroImage": {
     "image": "product-slipper-cutout.png",
     "alt": "SmartGuard 智慧主動式防跌偵測系統：感測模組內嵌於拖鞋鞋面的一體化設計"

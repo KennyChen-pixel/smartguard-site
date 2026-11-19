@@ -14,7 +14,7 @@ const h = home.hero;
     <p class="sub">{h.subtitle}</p>
     <p class="lede">{h.lede}</p>
     <div class="ctas">
-      <a class="btn btn-primary" href={h.ctaPrimary.href}>{h.ctaPrimary.label}<Icon name="ArrowRight" /></a>
+      <a class="btn btn-primary" href={h.ctaPrimary.href} target={h.ctaPrimary.external ? '_blank' : undefined} rel={h.ctaPrimary.external ? 'noopener noreferrer' : undefined}>{h.ctaPrimary.label}<Icon name="ArrowRight" />{h.ctaPrimary.external && <span class="sr-only">（另開新視窗）</span>}</a>
       <a class="btn btn-ghost" href={h.ctaSecondary.href}>{h.ctaSecondary.label}</a>
     </div>
   </div>

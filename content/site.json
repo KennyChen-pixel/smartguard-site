@@ -26,5 +26,5 @@
     { "label": "最新消息", "href": "/news" }
   ],
   "navCta": { "label": "聯絡與合作", "href": "/contact" },
-  "navCta2": { "label": "搶先體驗登記", "href": "https://forms.gle/dvjrjvYnjAk8rwUi8", "external": true }
+  "navCta2": { "label": "預約產品展示", "href": "/contact?type=產品諮詢" }
 }

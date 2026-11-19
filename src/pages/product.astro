@@ -28,7 +28,7 @@ const faqLd = faqItems.filter((f) => !isTodo(f.q) && !isTodo(f.a));
         <h1 class="display">{product.name}</h1>
         <p class="lede">{product.lede}</p>
         <div class="ctas">
-          <a class="btn btn-primary" href={home.hero.ctaPrimary.href}>{home.hero.ctaPrimary.label}<Icon name="ArrowRight" /></a>
+          <a class="btn btn-primary" href={product.cta.href}>{product.cta.label}<Icon name="ArrowRight" /></a>
           <a class="btn btn-ghost" href="/technology">{home.hero.ctaSecondary.label}</a>
         </div>
       </div>
