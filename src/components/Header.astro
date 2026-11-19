@@ -8,6 +8,7 @@ interface Props { overlay?: boolean }
 const { overlay = false } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isActive = (href: string) => path === href || path.startsWith(href + '/');
+const ext2 = 'external' in site.navCta2 && site.navCta2.external === true;   // 外部連結才另開新視窗
 ---
 <header class:list={['site-header', { overlay }]} data-header>
   <div class="bar container">
@@ -19,7 +20,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
       {site.nav.map((l) => (
         <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>
       ))}
-      <a class="btn btn-ghost sm" href={site.navCta2.href} target="_blank" rel="noopener noreferrer">{site.navCta2.label}<span class="sr-only">（另開新視窗）</span></a>
+      <a class="btn btn-ghost sm" href={site.navCta2.href} target={ext2 ? '_blank' : undefined} rel={ext2 ? 'noopener noreferrer' : undefined}>{site.navCta2.label}{ext2 && <span class="sr-only">（另開新視窗）</span>}</a>
       <a class="btn btn-primary sm" href={site.navCta.href}>{site.navCta.label}</a>
     </nav>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-btn>
@@ -32,7 +33,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
     {site.nav.map((l) => (
       <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}<Icon name="ArrowRight" size={20} /></a>
     ))}
-    <a class="btn btn-ghost" href={site.navCta2.href} target="_blank" rel="noopener noreferrer">{site.navCta2.label}<span class="sr-only">（另開新視窗）</span></a>
+    <a class="btn btn-ghost" href={site.navCta2.href} target={ext2 ? '_blank' : undefined} rel={ext2 ? 'noopener noreferrer' : undefined}>{site.navCta2.label}{ext2 && <span class="sr-only">（另開新視窗）</span>}</a>
     <a class="btn btn-primary" href={site.navCta.href}>{site.navCta.label}</a>
   </nav>
   <span class="progress" aria-hidden="true"></span>
