@@ -25,5 +25,6 @@
     { "label": "團隊", "href": "/team" },
     { "label": "最新消息", "href": "/news" }
   ],
-  "navCta": { "label": "聯絡與合作", "href": "/contact" }
+  "navCta": { "label": "聯絡與合作", "href": "/contact" },
+  "navCta2": { "label": "產品預購登記", "href": "https://forms.gle/dvjrjvYnjAk8rwUi8", "external": true }
 }
