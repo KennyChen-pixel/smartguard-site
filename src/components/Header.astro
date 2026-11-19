@@ -19,6 +19,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
       {site.nav.map((l) => (
         <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>
       ))}
+      <a class="btn btn-ghost sm" href={site.navCta2.href} target="_blank" rel="noopener noreferrer">{site.navCta2.label}<span class="sr-only">（另開新視窗）</span></a>
       <a class="btn btn-primary sm" href={site.navCta.href}>{site.navCta.label}</a>
     </nav>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-btn>
@@ -31,6 +32,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
     {site.nav.map((l) => (
       <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}<Icon name="ArrowRight" size={20} /></a>
     ))}
+    <a class="btn btn-ghost" href={site.navCta2.href} target="_blank" rel="noopener noreferrer">{site.navCta2.label}<span class="sr-only">（另開新視窗）</span></a>
     <a class="btn btn-primary" href={site.navCta.href}>{site.navCta.label}</a>
   </nav>
   <span class="progress" aria-hidden="true"></span>
@@ -99,9 +101,12 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
   .mobile a[aria-current='page'] { color: var(--cyan-ink); }
   .mobile .btn { margin-top: 16px; }
 
-  @media (min-width: 900px) {
+  /* 桌機導覽從 1024px 起顯示（導覽列含兩顆按鈕，較窄時會擠在一起，改用手機版選單） */
+  @media (min-width: 1024px) {
     .desktop { display: flex; }
     .menu-btn, .mobile { display: none !important; }
+  }
+  @media (min-width: 1180px) {
     .brand small { display: inline; }
   }
 </style>
